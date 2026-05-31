@@ -4,33 +4,34 @@ import useTrackerStore from '../store/useTrackerStore';
 import { MACHINE } from '../data/machineData';
 import { SkillTag } from '../components/ui/Badge';
 
-const LEVEL_STYLES = {
-  green: { text: 'text-green-600', border: 'border-green-200', icon: 'text-green-500' },
-  amber: { text: 'text-amber-600', border: 'border-amber-200', icon: 'text-amber-500' },
-  red:   { text: 'text-red-600',   border: 'border-red-200',   icon: 'text-red-500' },
+const LEVEL_COLOR = {
+  green: { text: '#05A357', border: 'rgba(5,163,87,0.25)',   bg: 'rgba(5,163,87,0.06)' },
+  amber: { text: '#B8860B', border: 'rgba(255,192,67,0.35)', bg: 'rgba(255,192,67,0.08)' },
+  red:   { text: '#E11900', border: 'rgba(225,25,0,0.25)',   bg: 'rgba(225,25,0,0.06)' },
 };
 
 export default function MachineCoding() {
-  const mcDone = useTrackerStore((s) => s.mcDone);
+  const mcDone   = useTrackerStore((s) => s.mcDone);
   const toggleMC = useTrackerStore((s) => s.toggleMC);
-
-  const handleToggle = useCallback((id) => {
-    toggleMC(id);
-  }, [toggleMC]);
+  const handleToggle = useCallback((id) => toggleMC(id), [toggleMC]);
 
   return (
     <div>
-      <p className="text-[13px] text-slate-500 mb-4 leading-relaxed">
+      <p className="text-[13px] mb-4 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
         Easy → hard. Your two failed interview tasks are marked ⚠️. Rebuild those first, at least 3 times each.
       </p>
 
       {MACHINE.map((lvl) => {
-        const styles = LEVEL_STYLES[lvl.color] || LEVEL_STYLES.amber;
+        const c = LEVEL_COLOR[lvl.color] || LEVEL_COLOR.amber;
         return (
           <div key={lvl.level} className="mb-6">
-            <div className={`text-[11px] font-bold uppercase tracking-wider mb-2 ${styles.text}`}>
+            <div
+              className="text-[11px] font-bold uppercase tracking-wider mb-2"
+              style={{ color: c.text }}
+            >
               {lvl.level}
             </div>
+
             {lvl.items.map((item, i) => {
               const prefix = lvl.level.split(' ')[0].toLowerCase();
               const id = `mc-${prefix}-${i}`;
@@ -41,16 +42,33 @@ export default function MachineCoding() {
                 <button
                   key={i}
                   onClick={() => handleToggle(id)}
-                  className={`w-full flex gap-3 items-start p-3.5 rounded-xl border mb-2 text-left transition-all active:scale-95
-                    ${done ? 'opacity-45 bg-slate-50 border-slate-200' : `bg-white ${isWarning ? 'border-amber-200 bg-amber-50' : 'border-slate-200'} hover:bg-slate-50`}
-                  `}
+                  className="w-full flex gap-3 items-start p-3.5 rounded-lg mb-2 text-left transition-all active:scale-95"
+                  style={{
+                    background: done
+                      ? 'var(--bg-elevated)'
+                      : isWarning ? 'rgba(255,192,67,0.07)' : 'var(--bg-surface)',
+                    border: `1px solid ${
+                      done ? 'var(--border)'
+                      : isWarning ? 'rgba(255,192,67,0.4)'
+                      : 'var(--border)'
+                    }`,
+                    opacity: done ? 0.5 : 1,
+                  }}
                 >
                   {done
-                    ? <CheckSquare size={18} className="text-green-500 flex-shrink-0 mt-0.5" />
-                    : <Square size={18} className="text-slate-300 flex-shrink-0 mt-0.5" />
+                    ? <CheckSquare size={18} style={{ color: '#05A357', flexShrink: 0, marginTop: 2 }} />
+                    : isWarning
+                      ? <AlertTriangle size={18} style={{ color: '#B8860B', flexShrink: 0, marginTop: 2 }} />
+                      : <Square size={18} style={{ color: 'var(--text-tertiary)', flexShrink: 0, marginTop: 2 }} />
                   }
                   <div className="flex-1 min-w-0">
-                    <div className={`text-[13px] font-medium leading-snug mb-1.5 ${done ? 'line-through' : 'text-slate-800'}`}>
+                    <div
+                      className="text-[13px] font-medium leading-snug mb-1.5"
+                      style={{
+                        color: done ? 'var(--text-tertiary)' : 'var(--text-primary)',
+                        textDecoration: done ? 'line-through' : 'none',
+                      }}
+                    >
                       {item.t}
                     </div>
                     <div className="flex flex-wrap">
