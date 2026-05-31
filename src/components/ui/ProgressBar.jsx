@@ -1,14 +1,22 @@
-export function ProgressBar({ pct, label, color = 'bg-green-600', className = '' }) {
+export function ProgressBar({ pct, label, className = '' }) {
   return (
     <div className={`flex items-center gap-2.5 ${className}`}>
-      <div className="flex-1 h-1 bg-slate-200 rounded-full overflow-hidden">
+      <div
+        className="flex-1 rounded-full overflow-hidden"
+        style={{ height: 3, background: 'var(--bg-overlay)' }}
+      >
         <div
-          className={`h-full ${color} rounded-full transition-all duration-500`}
-          style={{ width: `${Math.min(pct, 100)}%` }}
+          className="h-full rounded-full transition-all duration-500"
+          style={{ width: `${Math.min(pct, 100)}%`, background: 'var(--text-primary)' }}
         />
       </div>
       {label && (
-        <span className="text-[11px] text-slate-400 font-mono whitespace-nowrap">{label}</span>
+        <span
+          className="text-[11px] font-mono whitespace-nowrap"
+          style={{ color: 'var(--text-tertiary)' }}
+        >
+          {label}
+        </span>
       )}
     </div>
   );

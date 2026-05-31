@@ -1,33 +1,18 @@
-const COLOR_MAP = {
-  js:       'bg-amber-50 text-amber-700 border-amber-200',
-  react:    'bg-blue-50 text-blue-700 border-blue-200',
-  dsa:      'bg-green-50 text-green-700 border-green-200',
-  css:      'bg-purple-50 text-purple-700 border-purple-200',
-  system:   'bg-amber-50 text-amber-700 border-amber-200',
-  behavioral:'bg-purple-50 text-purple-700 border-purple-200',
-  easy:     'bg-green-50 text-green-700 border-green-200',
-  medium:   'bg-amber-50 text-amber-700 border-amber-200',
-  hard:     'bg-red-50 text-red-700 border-red-200',
-  amber:    'bg-amber-50 text-amber-700 border-amber-200',
-  blue:     'bg-blue-50 text-blue-700 border-blue-200',
-  green:    'bg-green-50 text-green-700 border-green-200',
-  red:      'bg-red-50 text-red-700 border-red-200',
-  default:  'bg-slate-100 text-slate-600 border-slate-200',
-};
-
-export function Badge({ label, color = 'default', className = '' }) {
-  const cls = COLOR_MAP[color] || COLOR_MAP.default;
+// Uber-style badge — pill shape, token colours
+export function Badge({ children, variant = 'default', className = '' }) {
+  const styles = {
+    default: { background: 'var(--bg-elevated)', color: 'var(--text-secondary)' },
+    success: { background: 'rgba(5,163,87,0.12)', color: '#05A357' },
+    warning: { background: 'rgba(255,192,67,0.15)', color: '#B8860B' },
+    danger:  { background: 'rgba(225,25,0,0.1)',   color: '#E11900' },
+    accent:  { background: 'rgba(39,110,241,0.12)', color: '#276EF1' },
+  };
   return (
-    <span className={`inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-md border ${cls} ${className}`}>
-      {label}
-    </span>
-  );
-}
-
-export function SkillTag({ label }) {
-  return (
-    <span className="inline-block bg-slate-100 border border-slate-200 text-slate-500 text-[10px] font-mono px-1.5 py-0.5 rounded mr-1 mt-0.5">
-      {label}
+    <span
+      className={`inline-flex items-center px-2 py-0.5 text-[11px] font-semibold ${className}`}
+      style={{ ...styles[variant] || styles.default, borderRadius: 'var(--radius-pill)' }}
+    >
+      {children}
     </span>
   );
 }

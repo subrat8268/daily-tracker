@@ -1,44 +1,177 @@
-import { useState } from 'react';
+import { useState, createContext, useContext } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
-import { Header } from './Header';
+import { Sun, Moon, ListChecks, NotebookPen, HelpCircle, MoreHorizontal,
+         LayoutDashboard, Calendar, Clock, Monitor, Linkedin } from 'lucide-react';
 import { BottomNav } from './BottomNav';
 import { MoreSheet } from './MoreSheet';
 import { Toast } from '../ui/Toast';
 import { useToast } from '../../hooks/useToast';
-import { createContext, useContext } from 'react';
+import { useTheme } from '../../hooks/useTheme';
+import { useProgress } from '../../hooks/useProgress';
+import { useStreak } from '../../hooks/useStreak';
 
 export const ToastContext = createContext(null);
+export const ThemeContext = createContext(null);
 export const useAppToast = () => useContext(ToastContext);
+export const useAppTheme = () => useContext(ThemeContext);
 
-const DESKTOP_TABS = [
-  { to: '/',          label: 'Today',         end: true },
-  { to: '/namaste',   label: 'NamasteDev' },
-  { to: '/weeks',     label: '12 Weeks' },
-  { to: '/routine',   label: 'Routine' },
-  { to: '/machine',   label: 'Machine Coding' },
-  { to: '/qa',        label: 'Q&A Bank' },
-  { to: '/log',       label: 'Daily Log' },
-  { to: '/linkedin',  label: 'LinkedIn' },
+const SIDEBAR_ITEMS = [
+  { to: '/',          label: 'Today',         Icon: LayoutDashboard, end: true },
+  { to: '/namaste',   label: 'NamasteDev',    Icon: ListChecks },
+  { to: '/weeks',     label: '12 Weeks',      Icon: Calendar },
+  { to: '/routine',   label: 'Routine',       Icon: Clock },
+  { to: '/machine',   label: 'Machine Coding',Icon: Monitor },
+  { to: '/qa',        label: 'Q&A Bank',      Icon: HelpCircle },
+  { to: '/log',       label: 'Daily Log',     Icon: NotebookPen },
+  { to: '/linkedin',  label: 'LinkedIn',      Icon: Linkedin },
 ];
 
-// Map routes → page titles shown in header on mobile
 const PAGE_TITLES = {
-  '/':          'Today',
-  '/namaste':   'NamasteDev',
-  '/weeks':     '12-Week Plan',
-  '/routine':   'Daily Routine',
-  '/machine':   'Machine Coding',
-  '/qa':        'Q&A Bank',
-  '/log':       'Daily Log',
-  '/linkedin':  'LinkedIn',
+  '/':         'Today',
+  '/namaste':  'NamasteDev',
+  '/weeks':    '12-Week Plan',
+  '/routine':  'Daily Routine',
+  '/machine':  'Machine Coding',
+  '/qa':       'Q&A Bank',
+  '/log':      'Daily Log',
+  '/linkedin': 'LinkedIn',
 };
 
-function PageTitle({ pathname }) {
-  const title = PAGE_TITLES[pathname] || '';
-  if (!title) return null;
+function Sidebar({ theme, onToggleTheme }) {
+  const [expanded, setExpanded] = useState(false);
+  const { done, total, pct } = useProgress();
+
   return (
-    <div className="px-4 pt-3 pb-1 md:hidden">
-      <h1 className="text-[18px] font-bold text-slate-900 tracking-tight">{title}</h1>
+    <aside
+      className="sidebar hidden md:flex flex-col h-screen sticky top-0 shrink-0 overflow-hidden"
+      style={{
+        width: expanded ? 'var(--sidebar-w-expanded)' : 'var(--sidebar-w-collapsed)',
+        background: 'var(--bg-surface)',
+        borderRight: '1px solid var(--border)',
+      }}
+      onMouseEnter={() => setExpanded(true)}
+      onMouseLeave={() => setExpanded(false)}
+    >
+      {/* Logo */}
+      <div className="flex items-center gap-3 px-4 py-5 shrink-0" style={{ minHeight: 64 }}>
+        <div
+          className="w-8 h-8 rounded flex items-center justify-center shrink-0 font-black text-sm"
+          style={{ background: 'var(--text-primary)', color: 'var(--text-inverse)' }}
+        >
+          SJ
+        </div>
+        {expanded && (
+          <span className="font-bold text-sm whitespace-nowrap" style={{ color: 'var(--text-primary)' }}>
+            Subrat's Tracker
+          </span>
+        )}
+      </div>
+
+      {/* Progress bar */}
+      {expanded && (
+        <div className="px-4 pb-4 shrink-0">
+          <div className="flex justify-between text-[11px] mb-1" style={{ color: 'var(--text-tertiary)' }}>
+            <span>Progress</span>
+            <span className="font-mono">{done}/{total}</span>
+          </div>
+          <div className="h-[3px] rounded-full" style={{ background: 'var(--bg-overlay)' }}>
+            <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{ width: `${Math.min(pct, 100)}%`, background: 'var(--text-primary)' }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Nav items */}
+      <nav className="flex-1 px-2 space-y-0.5 overflow-y-auto">
+        {SIDEBAR_ITEMS.map(({ to, label, Icon, end }) => (
+          <NavLink
+            key={to}
+            to={to}
+            end={end}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 group
+              ${isActive ? 'font-semibold' : 'font-medium'}`
+            }
+            style={({ isActive }) => ({
+              background: isActive ? 'var(--bg-elevated)' : 'transparent',
+              color: isActive ? 'var(--text-primary)' : 'var(--text-tertiary)',
+            })}
+          >
+            {({ isActive }) => (
+              <>
+                <Icon size={18} strokeWidth={isActive ? 2.5 : 1.8} className="shrink-0" />
+                {expanded && <span className="text-[13px] whitespace-nowrap">{label}</span>}
+              </>
+            )}
+          </NavLink>
+        ))}
+      </nav>
+
+      {/* Bottom — theme toggle */}
+      <div className="px-2 pb-4 shrink-0">
+        <button
+          onClick={onToggleTheme}
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg transition-colors"
+          style={{ color: 'var(--text-tertiary)' }}
+        >
+          {theme === 'dark'
+            ? <Sun size={18} strokeWidth={1.8} className="shrink-0" />
+            : <Moon size={18} strokeWidth={1.8} className="shrink-0" />}
+          {expanded && (
+            <span className="text-[13px] font-medium">
+              {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+            </span>
+          )}
+        </button>
+      </div>
+    </aside>
+  );
+}
+
+function TopBar({ title, theme, onToggleTheme }) {
+  const streak = useStreak();
+  const { done, total } = useProgress();
+  const dayNum = done; // reuse done count as rough day proxy
+
+  return (
+    <div
+      className="md:hidden flex items-center justify-between px-4 shrink-0"
+      style={{
+        height: 56,
+        background: 'var(--bg-surface)',
+        borderBottom: '1px solid var(--border)',
+      }}
+    >
+      {/* Left: wordmark */}
+      <div
+        className="w-8 h-8 rounded flex items-center justify-center font-black text-sm shrink-0"
+        style={{ background: 'var(--text-primary)', color: 'var(--text-inverse)' }}
+      >
+        SJ
+      </div>
+
+      {/* Center: page title */}
+      <span className="text-[15px] font-bold" style={{ color: 'var(--text-primary)' }}>
+        {title}
+      </span>
+
+      {/* Right: streak + toggle */}
+      <div className="flex items-center gap-3">
+        {streak > 0 && (
+          <span className="text-[12px] font-semibold" style={{ color: '#FFC043' }}>
+            🔥 {streak}
+          </span>
+        )}
+        <button
+          onClick={onToggleTheme}
+          className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
+          style={{ color: 'var(--text-secondary)', background: 'var(--bg-elevated)' }}
+        >
+          {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+        </button>
+      </div>
     </div>
   );
 }
@@ -47,48 +180,45 @@ export function AppShell() {
   const { toasts, addToast, removeToast } = useToast();
   const [moreOpen, setMoreOpen] = useState(false);
   const location = useLocation();
+  const { theme, toggle, isDark } = useTheme();
+
+  const pageTitle = PAGE_TITLES[location.pathname] || '';
 
   return (
     <ToastContext.Provider value={addToast}>
-      <div className="min-h-screen bg-slate-100">
-        <div className="max-w-5xl mx-auto md:p-4">
-          <div className="bg-white md:rounded-2xl md:shadow-lg overflow-hidden min-h-screen md:min-h-0">
-            <Header />
+      <ThemeContext.Provider value={{ theme, toggle, isDark }}>
+        <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg-base)' }}>
 
-            {/* Desktop tab nav */}
-            <div className="hidden md:flex overflow-x-auto border-b border-slate-100 px-2">
-              {DESKTOP_TABS.map(({ to, label, end }) => (
-                <NavLink
-                  key={to}
-                  to={to}
-                  end={end}
-                  className={({ isActive }) =>
-                    `px-3.5 py-2.5 text-[13px] font-medium border-b-2 whitespace-nowrap transition-colors shrink-0
-                    ${ isActive
-                        ? 'border-slate-900 text-slate-900 font-semibold'
-                        : 'border-transparent text-slate-500 hover:text-slate-700'
-                    }`
-                  }
-                >
-                  {label}
-                </NavLink>
-              ))}
-            </div>
+          {/* Desktop sidebar */}
+          <Sidebar theme={theme} onToggleTheme={toggle} />
 
-            {/* Mobile page title */}
-            <PageTitle pathname={location.pathname} />
+          {/* Main column */}
+          <div className="flex flex-col flex-1 min-w-0 h-screen">
 
-            {/* Page content */}
-            <div className="p-4 pb-24 md:pb-6">
-              <Outlet />
-            </div>
+            {/* Mobile top bar */}
+            <TopBar title={pageTitle} theme={theme} onToggleTheme={toggle} />
+
+            {/* Scrollable page content */}
+            <main
+              className="flex-1 overflow-y-auto"
+              style={{ background: 'var(--bg-base)' }}
+            >
+              <div className="p-4 pb-24 md:p-6 md:pb-6 max-w-5xl">
+                <Outlet />
+              </div>
+            </main>
           </div>
         </div>
 
+        {/* Mobile bottom nav */}
         <BottomNav onMoreClick={() => setMoreOpen(true)} />
+
+        {/* More sheet */}
         {moreOpen && <MoreSheet onClose={() => setMoreOpen(false)} />}
+
+        {/* Toast stack */}
         <Toast toasts={toasts} onRemove={removeToast} />
-      </div>
+      </ThemeContext.Provider>
     </ToastContext.Provider>
   );
 }

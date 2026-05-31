@@ -16,57 +16,46 @@ const TODAY_ITEMS = [
   { id: 2, time: '10:00 AM', label: 'NamasteDev: watch + solve + rewrite' },
   { id: 3, time: '1:00 PM',  label: 'KredBook: ship one visible thing' },
   { id: 4, time: '4:30 PM',  label: '1–2 fresh DSA problems' },
-  { id: 5, time: '5:30 PM',  label: 'ChatGPT voice quiz on today’s JS/React topic' },
+  { id: 5, time: '5:30 PM',  label: 'ChatGPT voice quiz on today's JS/React topic' },
   { id: 6, time: '8:30 PM',  label: 'Fill the daily log' },
 ];
 
-const STREAK_COLORS = [
-  'bg-slate-100', 'bg-green-100', 'bg-green-300', 'bg-green-500', 'bg-green-800',
-];
-
 export default function Today() {
-  const todayChecks    = useTrackerStore((s) => s.todayChecks);
+  const todayChecks      = useTrackerStore((s) => s.todayChecks);
   const toggleTodayCheck = useTrackerStore((s) => s.toggleTodayCheck);
-  const streakData     = useTrackerStore((s) => s.streakData);
-  const cycleStreak    = useTrackerStore((s) => s.cycleStreak);
-  const setStreak      = useTrackerStore((s) => s.setStreak);
-  const nsDone         = useTrackerStore((s) => s.nsDone);
-  const qaUser         = useTrackerStore((s) => s.qaUser);
-  const streak         = useStreak();
-  const addToast       = useAppToast();
+  const streakData       = useTrackerStore((s) => s.streakData);
+  const cycleStreak      = useTrackerStore((s) => s.cycleStreak);
+  const setStreak        = useTrackerStore((s) => s.setStreak);
+  const nsDone           = useTrackerStore((s) => s.nsDone);
+  const qaUser           = useTrackerStore((s) => s.qaUser);
+  const streak           = useStreak();
+  const addToast         = useAppToast();
 
   const todayStr = new Date().toDateString();
   const today    = new Date();
-
-  const dayNum = Math.min(
+  const dayNum   = Math.min(
     Math.floor((today - START_DATE) / (1000 * 60 * 60 * 24)) + 1,
     TOTAL_DAYS,
   );
-
   const nsDoneCount = Object.values(nsDone).filter((v) => v === 'done').length;
 
-  // Auto-set streak level from checklist completion
   useEffect(() => {
     const checkedCount = Object.entries(todayChecks)
       .filter(([k, v]) => k.includes(todayStr) && v === true).length;
     const autoLevel = checkedCount >= 6 ? 4 : checkedCount >= 4 ? 3 : checkedCount >= 2 ? 2 : checkedCount >= 1 ? 1 : 0;
-    // Only auto-update if current level is lower (don’t downgrade a manual override)
     const current = streakData[todayStr] || 0;
     if (autoLevel > current) setStreak(todayStr, autoLevel);
   }, [todayChecks, todayStr, streakData, setStreak]);
 
   const handleToggle = useCallback(
-    (id) => { toggleTodayCheck(`today-${id}`, todayStr); },
+    (id) => toggleTodayCheck(`today-${id}`, todayStr),
     [toggleTodayCheck, todayStr],
   );
 
-  const handleStreakClick = useCallback(
-    (dateStr) => {
-      cycleStreak(dateStr);
-      addToast?.('Streak updated!', 'success');
-    },
-    [cycleStreak, addToast],
-  );
+  const handleStreakClick = useCallback((dateStr) => {
+    cycleStreak(dateStr);
+    addToast?.('Streak updated!', 'success');
+  }, [cycleStreak, addToast]);
 
   const days = Array.from({ length: TOTAL_DAYS }, (_, i) => {
     const d = new Date(START_DATE);
@@ -76,32 +65,52 @@ export default function Today() {
 
   return (
     <div>
-      {/* Streak at risk banner — only shows after 8 PM with < 4 checks */}
       <StreakAlertBanner />
 
-      {/* Stats row */}
-      <div className="grid grid-cols-4 gap-2 mb-4">
+      {/* Stat tiles — left-aligned Uber dashboard style */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         {[
-          { value: dayNum,          label: 'Day of 90' },
-          { value: `🔥 ${streak}`,  label: 'Day streak' },
-          { value: nsDoneCount,     label: 'Namaste done' },
-          { value: qaUser.length,   label: 'Q&As saved' },
-        ].map(({ value, label }) => (
-          <FlatCard key={label} className="text-center mb-0! py-2.5">
-            <div className="text-xl font-bold text-slate-800">{value}</div>
-            <div className="text-[10px] text-slate-400 leading-tight mt-0.5">{label}</div>
-          </FlatCard>
+          { value: `${dayNum}`,        sub: 'of 90',     label: 'Day' },
+          { value: `${streak}`,        sub: 'streak',    label: '🔥', accent: streak >= 3 },
+          { value: `${nsDoneCount}`,   sub: 'completed', label: 'Namaste' },
+          { value: `${qaUser.length}`, sub: 'saved',     label: 'Q&As' },
+        ].map(({ value, sub, label, accent }) => (
+          <div
+            key={label}
+            className="p-4"
+            style={{
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-card)',
+              boxShadow: 'var(--shadow-card)',
+            }}
+          >
+            <div className="text-[11px] font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>{label}</div>
+            <div className="flex items-baseline gap-1.5">
+              <span
+                className="text-3xl font-black"
+                style={{ color: accent ? '#FFC043' : 'var(--text-primary)', letterSpacing: '-0.03em' }}
+              >
+                {value}
+              </span>
+              <span className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>{sub}</span>
+            </div>
+          </div>
         ))}
       </div>
 
-      {/* Weekly summary — pulls from Supabase */}
       <WeeklySummaryCard />
 
-      {/* Today's checklist */}
+      {/* Today checklist */}
       <Card>
         <div className="flex items-center gap-2 mb-3">
-          <Target size={15} className="text-blue-500" />
-          <span className="text-[13px] font-semibold text-slate-800">Today’s focus checklist</span>
+          <Target size={14} style={{ color: 'var(--accent)' }} />
+          <span className="text-[13px] font-semibold" style={{ color: 'var(--text-primary)' }}>
+            Today's focus
+          </span>
+          <span className="ml-auto text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
+            {Object.entries(todayChecks).filter(([k, v]) => k.includes(todayStr) && v).length} / {TODAY_ITEMS.length}
+          </span>
         </div>
         {TODAY_ITEMS.map(({ id, time, label }) => {
           const key = `today-${id}_${todayStr}`;
@@ -120,9 +129,11 @@ export default function Today() {
       {/* Streak heatmap */}
       <Card>
         <div className="flex items-center gap-2 mb-3">
-          <Flame size={15} className="text-amber-500" />
-          <span className="text-[13px] font-semibold text-slate-800">90-day activity streak</span>
-          <span className="text-[11px] text-slate-400">— tap to override</span>
+          <Flame size={14} style={{ color: '#FFC043' }} />
+          <span className="text-[13px] font-semibold" style={{ color: 'var(--text-primary)' }}>
+            90-day streak
+          </span>
+          <span className="ml-auto text-[11px]" style={{ color: 'var(--text-tertiary)' }}>tap to override</span>
         </div>
         <div className="flex flex-wrap gap-[3px]">
           {days.map((d) => {
@@ -138,32 +149,39 @@ export default function Today() {
             );
           })}
         </div>
-        <div className="flex gap-2 items-center mt-3 text-[11px] text-slate-400 flex-wrap">
-          {['none', 'light', 'good', 'solid', 'beast'].map((l, i) => (
+        {/* Legend */}
+        <div className="flex gap-3 items-center mt-3 flex-wrap">
+          {['none','light','good','solid','beast'].map((l, i) => (
             <span key={l} className="flex items-center gap-1">
-              <span className={`w-3.5 h-3.5 rounded-[2px] ${STREAK_COLORS[i]} border border-slate-200`} />
-              {l}
+              <span
+                className="w-3 h-3"
+                style={{
+                  display: 'inline-block',
+                  borderRadius: 3,
+                  background: i === 0 ? 'var(--bg-elevated)' : `rgba(39,110,241,${[0.2,0.45,0.75,1][i-1]})`,
+                  border: '1px solid var(--border)',
+                }}
+              />
+              <span className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>{l}</span>
             </span>
           ))}
         </div>
       </Card>
 
       {/* Senior reminder */}
-      <Card accent accentColor="border-l-slate-300">
+      <Card accent accentColor="var(--text-tertiary)">
         <div className="flex items-center gap-2 mb-2">
-          <Mic size={14} className="text-slate-400" />
-          <span className="text-[13px] font-semibold text-slate-700">Senior reminder</span>
+          <Mic size={13} style={{ color: 'var(--text-tertiary)' }} />
+          <span className="text-[13px] font-semibold" style={{ color: 'var(--text-primary)' }}>Senior reminder</span>
         </div>
-        <p className="text-[13px] text-slate-500 leading-relaxed mb-2">
-          You froze in those interviews because you had zero reps — not because
-          you’re not smart. Two Sum, filter dashboard — fixable with 30 practice
-          reps, not 30 days of theory. You have production code at AU Bank,
-          XPharms, KredBook. What you’re adding now is interview muscle.
+        <p className="text-[13px] leading-relaxed mb-2" style={{ color: 'var(--text-secondary)' }}>
+          You froze in those interviews because you had zero reps — not because you're not smart.
+          Two Sum, filter dashboard — fixable with 30 practice reps, not 30 days of theory.
+          You have production code at AU Bank, XPharms, KredBook. What you're adding now is interview muscle.
         </p>
-        <p className="text-[13px] text-slate-500 leading-relaxed">
-          ChatGPT voice mode for JS/React is smart. Use it like a mock
-          interviewer, not a teacher — “quiz me on closures”, not “explain
-          closures to me.” The difference is the direction of effort.
+        <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+          ChatGPT voice mode for JS/React is smart. Use it like a mock interviewer —
+          "quiz me on closures", not "explain closures to me."
         </p>
       </Card>
     </div>
