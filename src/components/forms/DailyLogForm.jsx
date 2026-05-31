@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 import useTrackerStore from '../../store/useTrackerStore';
 import { supabase, isSupabaseEnabled } from '../../lib/supabase';
 
@@ -29,23 +29,30 @@ function QuickBtn({ value, selected, onClick }) {
   );
 }
 
-export function DailyLogForm({ onSaved, onLogAdded }) {
-  const saveLog = useTrackerStore((s) => s.saveLog);
+export function DailyLogForm({ onSaved, onLogAdded, prefillDsa }) {
+  const saveLog  = useTrackerStore((s) => s.saveLog);
   const setStreak = useTrackerStore((s) => s.setStreak);
 
   const today = new Date().toISOString().split('T')[0];
-  const [mood, setMood] = useState('✅');
+  const [mood, setMood]           = useState('✅');
   const [kredHours, setKredHours] = useState(null);
   const [studyHours, setStudyHours] = useState(null);
   const [showNotes, setShowNotes] = useState(false);
-  const [date, setDate] = useState(today);
-  const [saving, setSaving] = useState(false);
+  const [date, setDate]           = useState(today);
+  const [saving, setSaving]       = useState(false);
 
-  const dsaRef = useRef();
-  const jsRef = useRef();
-  const mcRef = useRef();
+  const dsaRef      = useRef();
+  const jsRef       = useRef();
+  const mcRef       = useRef();
   const tomorrowRef = useRef();
-  const notesRef = useRef();
+  const notesRef    = useRef();
+
+  // Auto-fill DSA field with yesterday’s tomorrow_task
+  useEffect(() => {
+    if (prefillDsa && dsaRef.current && !dsaRef.current.value) {
+      dsaRef.current.value = prefillDsa;
+    }
+  }, [prefillDsa]);
 
   const handleSave = useCallback(async () => {
     if (!tomorrowRef.current?.value?.trim() && !dsaRef.current?.value?.trim()) {
@@ -58,19 +65,18 @@ export function DailyLogForm({ onSaved, onLogAdded }) {
     const supabasePayload = {
       date,
       mood,
-      study_hours: studyHours ? parseFloat(studyHours) : null,
-      kred_hours: kredHours ? parseFloat(kredHours) : null,
-      dsa_done: dsaRef.current?.value || '',
-      js_rev: jsRef.current?.value || '',
-      mc_done: mcRef.current?.value || '',
-      tomorrow_task: tomorrowRef.current?.value || '',
-      notes: notesRef.current?.value || '',
+      study_hours:    studyHours ? parseFloat(studyHours) : null,
+      kred_hours:     kredHours  ? parseFloat(kredHours)  : null,
+      dsa_done:       dsaRef.current?.value      || '',
+      js_rev:         jsRef.current?.value       || '',
+      mc_done:        mcRef.current?.value       || '',
+      tomorrow_task:  tomorrowRef.current?.value || '',
+      notes:          notesRef.current?.value    || '',
     };
 
     let savedId = `${Date.now()}`;
 
     if (isSupabaseEnabled) {
-      // Upsert by date so re-logging same day updates instead of duplicating
       const { data, error } = await supabase
         .from('daily_logs')
         .upsert(supabasePayload, { onConflict: 'date' })
@@ -82,32 +88,28 @@ export function DailyLogForm({ onSaved, onLogAdded }) {
         onSaved?.('Saved locally (Supabase error)', 'error');
       } else {
         savedId = data.id;
-        onLogAdded?.(data); // notify parent to refresh list
+        onLogAdded?.(data);
         onSaved?.('Logged to cloud! ☁️🔥', 'success');
       }
     } else {
       onSaved?.('Logged locally (no Supabase)', 'success');
     }
 
-    // Always keep localStorage in sync via store
-    const localEntry = {
-      id: savedId,
-      date,
-      mood,
-      study: studyHours ?? '',
-      kred: kredHours ?? '',
-      dsa: dsaRef.current?.value || '',
-      js: jsRef.current?.value || '',
-      mc: mcRef.current?.value || '',
-      tomorrow: tomorrowRef.current?.value || '',
-      notes: notesRef.current?.value || '',
-    };
-    saveLog(localEntry);
-
-    // Auto-update streak from mood
-    const d = new Date(date);
+    // Sync streak from mood
     const moodObj = MOODS.find((m) => m.emoji === mood);
+    const d = new Date(date);
     setStreak(d.toDateString(), moodObj?.streakLevel ?? 0);
+
+    saveLog({
+      id: savedId, date, mood,
+      study: studyHours ?? '',
+      kred:  kredHours  ?? '',
+      dsa:   dsaRef.current?.value      || '',
+      js:    jsRef.current?.value       || '',
+      mc:    mcRef.current?.value       || '',
+      tomorrow: tomorrowRef.current?.value || '',
+      notes:    notesRef.current?.value    || '',
+    });
 
     setSaving(false);
   }, [date, mood, studyHours, kredHours, onSaved, onLogAdded, saveLog, setStreak]);
@@ -136,10 +138,7 @@ export function DailyLogForm({ onSaved, onLogAdded }) {
               onClick={() => setMood(m.emoji)}
               title={m.label}
               className={`flex-1 h-12 text-xl rounded-xl border-2 transition-all
-                ${mood === m.emoji
-                  ? 'border-slate-900 bg-slate-100 scale-110'
-                  : 'border-slate-200 hover:border-slate-300'
-                }`}
+                ${mood === m.emoji ? 'border-slate-900 bg-slate-100 scale-110' : 'border-slate-200 hover:border-slate-300'}`}
             >
               {m.emoji}
             </button>
@@ -149,10 +148,10 @@ export function DailyLogForm({ onSaved, onLogAdded }) {
 
       {/* Text inputs */}
       {[
-        { label: 'DSA done today', ref: dsaRef, placeholder: 'e.g. Two Sum hashmap, Remove Duplicates', autoFocus: true },
-        { label: 'JS / React concept', ref: jsRef, placeholder: 'e.g. Closures + makeCounter, useEffect gotchas' },
-        { label: 'Machine coding built', ref: mcRef, placeholder: 'e.g. Search filter UI from scratch' },
-        { label: 'Tomorrow at 6 AM ✨', ref: tomorrowRef, placeholder: 'e.g. Valid Anagram + useFetch hook' },
+        { label: 'DSA done today',      ref: dsaRef,      placeholder: 'e.g. Two Sum hashmap, Remove Duplicates', autoFocus: true },
+        { label: 'JS / React concept',  ref: jsRef,       placeholder: 'e.g. Closures + makeCounter, useEffect gotchas' },
+        { label: 'Machine coding built', ref: mcRef,      placeholder: 'e.g. Search filter UI from scratch' },
+        { label: 'Tomorrow at 6 AM ✨',  ref: tomorrowRef, placeholder: 'e.g. Valid Anagram + useFetch hook' },
       ].map(({ label, ref, placeholder, autoFocus }) => (
         <div key={label}>
           <label className="block text-xs text-slate-500 font-semibold uppercase tracking-wide mb-1.5">{label}</label>
@@ -187,19 +186,15 @@ export function DailyLogForm({ onSaved, onLogAdded }) {
         </div>
       </div>
 
-      {/* Notes (hidden by default) */}
+      {/* Notes toggle */}
       {!showNotes ? (
-        <button
-          type="button"
-          onClick={() => setShowNotes(true)}
-          className="text-sm text-blue-500 hover:text-blue-700"
-        >
+        <button type="button" onClick={() => setShowNotes(true)} className="text-sm text-blue-500 hover:text-blue-700">
           + Add notes / blockers
         </button>
       ) : (
         <div>
           <label className="block text-xs text-slate-500 font-semibold uppercase tracking-wide mb-1.5">
-            Notes / blockers / what I'd do differently
+            Notes / blockers / what I’d do differently
           </label>
           <textarea
             ref={notesRef}
@@ -212,7 +207,7 @@ export function DailyLogForm({ onSaved, onLogAdded }) {
         </div>
       )}
 
-      {/* Save button */}
+      {/* Save */}
       <button
         type="button"
         onClick={handleSave}
