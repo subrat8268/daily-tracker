@@ -15,6 +15,39 @@ The single shape signature is the pill. Every interactive element rounds to `{ro
 - A signature alternating-band rhythm: white feature card → black promo card (with white text and white CTA) → white feature card → black footer. The black bands are NOT hero-only; they appear mid-page as promo callouts.
 - A signature ride-request form card on the hero: pickup pin input + destination input + date/time chip + black "See prices" pill, all stacked inside a `{rounded.xl}` shadowed card.
 
+## Design Tokens
+
+Our CSS custom properties represent the core visual architecture of our system. They enable theme synchronization (Light/Dark mode) while maintaining semantic cohesion across all components.
+
+### Background
+* `--bg-base`: Viewport base background color (`#F7F7F7` in Light, `#0A0A0A` in Dark).
+* `--bg-surface`: Primary background color for container surfaces such as cards and dashboards (`#FFFFFF` in Light, `#141414` in Dark).
+* `--bg-elevated`: Background color for elevated sub-regions, navigation items, and list headers (`#F0F0F0` in Light, `#1E1E1E` in Dark).
+
+### Text
+* `--text-primary`: Primary color for high-emphasis elements, main headings, and active text values (`#000000` in Light, `#F5F5F5` in Dark).
+* `--text-secondary`: Secondary color for supporting paragraphs, descriptions, and side captions (`#545454` in Light, `#ABABAB` in Dark).
+* `--text-tertiary`: Muted color for low-priority timestamps, placeholder labels, and deactivated metadata (`#8A8A8A` in Light, `#666666` in Dark).
+
+### Accent & Status
+* `--accent`: Interactive brand color used to highlight critical controls, current routes, and primary buttons (`#276EF1`).
+* `--success`: Positive status color for completed items, progress checkmarks, and streak indicators (`#05A357`).
+* `--warning`: Alert/caution status color used for in-progress routines, dynamic reminders, and alerts (`#E6A817`).
+* `--danger`: Negative status color for high-risk delete inputs, clear actions, and system errors (`#E11900`).
+* `--success-surface`: Soft background tint for positive completion states and streak markers (`rgba(5,163,87,0.09)` in Light, `rgba(5,163,87,0.14)` in Dark).
+* `--warning-surface`: Soft background tint for warning notifications and daily schedule callouts (`rgba(230,168,23,0.10)` in Light, `rgba(230,168,23,0.14)` in Dark).
+* `--danger-surface`: Soft background tint for deleted records, error statuses, and risk warnings (`rgba(225,25,0,0.08)` in Light, `rgba(225,25,0,0.14)` in Dark).
+
+### Borders & Shadows
+* `--border`: Default divider color used for list items, card edges, and table grids (`#E2E2E2` in Light, `#2A2A2A` in Dark).
+* `--border-strong`: Medium-contrast divider color used for scrollbar tracks and emphasized layout borders (`#C8C8C8` in Light, `#3A3A3A` in Dark).
+* `--shadow-card`: Subtle ambient drop shadow for standard surface containers and cards to give low elevation depth (`rgba(0,0,0,0.06)` in Light, `rgba(0,0,0,0.3)` in Dark).
+* `--shadow-elevated`: Pronounced box shadow for interactive overlays, dropdown selectors, and notification toasts (`rgba(0,0,0,0.10)` in Light, `rgba(0,0,0,0.4)` in Dark).
+
+### Shape
+* `--radius-card`: Corner radius value used globally for container shapes, input areas, and key action components (`16px`).
+* `--radius-sm`: Corner radius value for micro-level indicators, tags, status pills, and checkbox items (`4px`).
+
 ## Colors
 
 ### Brand & Accent

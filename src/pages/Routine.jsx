@@ -95,10 +95,10 @@ export default function Routine() {
           📓 Night log rule (non-negotiable)
         </div>
         <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-          8:30 PM: open the Daily Log tab. Write what you solved, what was hard,
-          and tomorrow's 6 AM first task. Log it here in the tracker. "Log to AI
-          and know next step" from your notebook — do that here. This compounds
-          faster than you think.
+          11:00 PM: open the Daily Log tab. Write what you solved, what was hard, and 
+          tomorrow's 6 AM first task. Before that at 7:30 PM, do a quick revision block — 
+          write 3 things you learned today. At 9:00 PM, plan tomorrow and shut down. 
+          Log it here in the tracker. This routine compounds faster than you think.
         </p>
       </Card>
     </div>

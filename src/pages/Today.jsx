@@ -11,21 +11,15 @@ import { StreakAlertBanner } from "../components/ui/StreakAlertBanner";
 import { START_DATE, TOTAL_DAYS } from "../data/constants";
 
 const TODAY_ITEMS = [
-  {
-    id: 0,
-    time: "6:00 AM",
-    label: "Rewrite one old problem from memory — no AI",
-  },
-  { id: 1, time: "8:00 AM", label: "Workout done" },
-  { id: 2, time: "10:00 AM", label: "NamasteDev: watch + solve + rewrite" },
-  { id: 3, time: "1:00 PM", label: "KredBook: ship one visible thing" },
-  { id: 4, time: "4:30 PM", label: "1–2 fresh DSA problems" },
-  {
-    id: 5,
-    time: "5:30 PM",
-    label: "ChatGPT voice quiz on today's JS/React topic",
-  },
-  { id: 6, time: "8:30 PM", label: "Fill the daily log" },
+  { id: 0, time: "6:00 AM",  label: "Morning: hydration → plan today's 3 tasks → light review of yesterday" },
+  { id: 1, time: "8:00 AM",  label: "Workout done" },
+  { id: 2, time: "10:00 AM", label: "NamasteDev: watch concept → solve it yourself → rewrite from scratch" },
+  { id: 3, time: "1:00 PM",  label: "KredBook: ship one visible feature or fix" },
+  { id: 4, time: "4:30 PM",  label: "1–2 fresh DSA problems — no AI first attempt" },
+  { id: 5, time: "5:30 PM",  label: "Machine coding or ChatGPT voice quiz on today's JS/React topic" },
+  { id: 6, time: "7:30 PM",  label: "Revision: write what you learned, what blocked you" },
+  { id: 7, time: "9:00 PM",  label: "Tomorrow planning: write 6 AM first task, shutdown" },
+  { id: 8, time: "11:00 PM", label: "Fill the daily log — takes under 60 seconds" },
 ];
 
 export default function Today() {

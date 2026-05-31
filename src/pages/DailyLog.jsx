@@ -202,7 +202,7 @@ export default function DailyLog() {
   return (
     <div>
       <p className="text-[13px] mb-1 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-        Fill this every night at 8:30 PM. Takes under 60 seconds.
+        Fill this every night at 11:00 PM. Takes under 60 seconds.
       </p>
       <p className="text-[11px] mb-4 font-medium">
         {isSupabaseEnabled
