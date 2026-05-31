@@ -1,0 +1,15 @@
+Removed dead files on 2026-05-31:
+
+src/pages/DailyRoutine.tsx
+src/pages/InterviewTips.tsx
+src/pages/LinkedIn.tsx
+src/pages/MachineCoding.tsx
+src/pages/Overview.tsx
+src/pages/WeekPlan.tsx
+src/data/daily.ts
+src/data/machine.ts
+src/data/phases.ts
+src/data/tips.ts
+src/data/weeks.ts
+
+All replaced by active .jsx/.js counterparts imported in App.jsx.
