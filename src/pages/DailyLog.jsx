@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Trash2, Download } from 'lucide-react';
+import { Trash2, Download, Share2 } from 'lucide-react';
 import useTrackerStore from '../store/useTrackerStore';
 import { supabase, isSupabaseEnabled } from '../lib/supabase';
 import { DailyLogForm } from '../components/forms/DailyLogForm';
 import { Card } from '../components/ui/Card';
 import { useAppToast } from '../components/layout/AppShell';
 import { calcScore } from '../hooks/useWeeklySummary';
+import { ShareCardModal } from '../components/ui/ShareCardModal';
 
 function ScoreBadge({ log }) {
   const score = calcScore(log);
@@ -24,7 +25,7 @@ function ScoreBadge({ log }) {
   );
 }
 
-function LogCard({ log, onDelete }) {
+function LogCard({ log, onDelete, onShare }) {
   return (
     <div
       className="mb-2"
@@ -42,16 +43,28 @@ function LogCard({ log, onDelete }) {
           <span className="text-[12px] font-mono" style={{ color: 'var(--text-tertiary)' }}>{log.date}</span>
           <ScoreBadge log={log} />
         </div>
-        <button
-          onClick={() => onDelete(log.id)}
-          className="p-1.5 rounded-lg transition-colors duration-150"
-          style={{ color: 'var(--text-tertiary)' }}
-          onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--danger)'; e.currentTarget.style.background = 'var(--danger-surface)'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-tertiary)'; e.currentTarget.style.background = 'transparent'; }}
-        >
-          <Trash2 size={13} />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => onShare(log)}
+            className="p-1.5 rounded-lg transition-colors duration-150"
+            style={{ color: 'var(--text-tertiary)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--accent)'; e.currentTarget.style.background = 'var(--bg-elevated)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-tertiary)'; e.currentTarget.style.background = 'transparent'; }}
+          >
+            <Share2 size={13} />
+          </button>
+          <button
+            onClick={() => onDelete(log.id)}
+            className="p-1.5 rounded-lg transition-colors duration-150"
+            style={{ color: 'var(--text-tertiary)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--danger)'; e.currentTarget.style.background = 'var(--danger-surface)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-tertiary)'; e.currentTarget.style.background = 'transparent'; }}
+          >
+            <Trash2 size={13} />
+          </button>
+        </div>
       </div>
+
       <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[12px]">
         {log.study_hours != null && (
           <div>
@@ -128,6 +141,7 @@ export default function DailyLog() {
   const [cloudLogs, setCloudLogs] = useState([]);
   const [loading,   setLoading]   = useState(false);
   const [prefill,   setPrefill]   = useState(null);
+  const [activeLogForShare, setActiveLogForShare] = useState(null);
 
   useEffect(() => {
     if (!isSupabaseEnabled) return;
@@ -243,7 +257,7 @@ export default function DailyLog() {
           ? <p className="text-[13px] text-center py-8" style={{ color: 'var(--text-tertiary)' }}>
               {loading ? 'Fetching logs…' : 'No logs yet. Fill the form above tonight.'}
             </p>
-          : logs.map((log) => <LogCard key={log.id} log={log} onDelete={handleDelete} />)}
+          : logs.map((log) => <LogCard key={log.id} log={log} onDelete={handleDelete} onShare={setActiveLogForShare} />)}
       </div>
 
       {/* Desktop table */}
@@ -289,15 +303,26 @@ export default function DailyLog() {
                     <td className="px-3 py-2 max-w-[100px] truncate" style={{ color: 'var(--text-secondary)' }}>{l.mc_done  || l.mc  || '—'}</td>
                     <td className="px-3 py-2 max-w-[120px] truncate" style={{ color: 'var(--accent)' }}>{l.tomorrow_task || l.tomorrow || '—'}</td>
                     <td className="px-3 py-2">
-                      <button
-                        onClick={() => handleDelete(l.id)}
-                        className="p-1 rounded transition-colors duration-150"
-                        style={{ color: 'var(--text-tertiary)' }}
-                        onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--danger)'; e.currentTarget.style.background = 'var(--danger-surface)'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-tertiary)'; e.currentTarget.style.background = 'transparent'; }}
-                      >
-                        <Trash2 size={13} />
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => setActiveLogForShare(l)}
+                          className="p-1 rounded transition-colors duration-150"
+                          style={{ color: 'var(--text-tertiary)' }}
+                          onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--accent)'; e.currentTarget.style.background = 'var(--bg-elevated)'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-tertiary)'; e.currentTarget.style.background = 'transparent'; }}
+                        >
+                          <Share2 size={13} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(l.id)}
+                          className="p-1 rounded transition-colors duration-150"
+                          style={{ color: 'var(--text-tertiary)' }}
+                          onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--danger)'; e.currentTarget.style.background = 'var(--danger-surface)'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-tertiary)'; e.currentTarget.style.background = 'transparent'; }}
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -305,6 +330,14 @@ export default function DailyLog() {
             </table>
           )}
       </div>
+
+      {/* Share Card Modal */}
+      <ShareCardModal
+        log={activeLogForShare}
+        isOpen={!!activeLogForShare}
+        onClose={() => setActiveLogForShare(null)}
+      />
     </div>
   );
 }
+

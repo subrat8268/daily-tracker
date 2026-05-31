@@ -1,0 +1,100 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@400;500&display=swap');
+  .dt-root { font-family: 'DM Sans', sans-serif; padding: 1.5rem 0 2rem; }
+  .dt-wrap { width: 540px; margin: 0 auto; background: #0B0F1A; border-radius: 16px; overflow: hidden; }
+  .dt-header { padding: 28px 32px 20px; display: flex; align-items: flex-start; justify-content: space-between; }
+  .dt-left {}
+  .dt-day-big { font-family: 'Syne', sans-serif; font-size: 54px; font-weight: 800; color: #F8F6F0; line-height: 1; }
+  .dt-day-big span { color: #5DCAA5; }
+  .dt-sub { font-size: 12px; color: #5F5E5A; margin-top: 4px; letter-spacing: 0.04em; }
+  .dt-right { text-align: right; }
+  .dt-date { font-size: 12px; color: #5F5E5A; }
+  .dt-streak { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: #EF9F27; margin-top: 2px; }
+  .dt-streak-label { font-size: 10px; color: #5F5E5A; text-transform: uppercase; letter-spacing: 0.05em; }
+  .dt-divider { height: 0.5px; background: #1e2535; margin: 0 32px; }
+  .dt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; padding: 16px 32px; }
+  .dt-cell { padding: 10px 0; }
+  .dt-cell:nth-child(odd) { padding-right: 20px; border-right: 0.5px solid #1e2535; }
+  .dt-cell:nth-child(even) { padding-left: 20px; }
+  .dt-cell-label { font-size: 10px; color: #5F5E5A; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .dt-cell-content { font-size: 13px; color: #D3D1C7; line-height: 1.5; }
+  .dt-cell-content .done { color: #5DCAA5; }
+  .dt-cell-content .wip { color: #EF9F27; }
+  .dt-footer { background: #060911; padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .dt-dots { display: flex; gap: 5px; flex-wrap: wrap; max-width: 280px; }
+  .dt-dot { width: 10px; height: 10px; border-radius: 2px; }
+  .dot-done { background: #5DCAA5; }
+  .dot-today { background: #EF9F27; }
+  .dot-empty { background: #1e2535; }
+  .dt-hashtags { font-size: 11px; color: #3C3489; line-height: 1.8; text-align: right; }
+</style>
+<div class="dt-root">
+  <div class="dt-wrap">
+    <div class="dt-header">
+      <div class="dt-left">
+        <div class="dt-day-big">Day <span>5</span></div>
+        <div class="dt-sub">of 90 — frontend dev prep</div>
+      </div>
+      <div class="dt-right">
+        <div class="dt-date">May 31, 2026</div>
+        <div class="dt-streak">5🔥</div>
+        <div class="dt-streak-label">day streak</div>
+      </div>
+    </div>
+    <div class="dt-divider"></div>
+    <div class="dt-grid">
+      <div class="dt-cell">
+        <div class="dt-cell-label">DSA today</div>
+        <div class="dt-cell-content">
+          <span class="done">✓</span> Two Sum (hashmap)<br>
+          <span class="done">✓</span> Remove duplicates<br>
+          <span class="wip">→</span> Group by property
+        </div>
+      </div>
+      <div class="dt-cell">
+        <div class="dt-cell-label">JS / React</div>
+        <div class="dt-cell-content">
+          <span class="done">✓</span> Closures deep dive<br>
+          <span class="done">✓</span> makeCounter() built<br>
+          <span class="wip">→</span> React reconciliation
+        </div>
+      </div>
+      <div class="dt-cell" style="border-top: 0.5px solid #1e2535;">
+        <div class="dt-cell-label">KredBook</div>
+        <div class="dt-cell-content">
+          <span class="wip">→</span> Entry screen WIP<br>
+          <span style="color:#5F5E5A;">React Native + Supabase</span>
+        </div>
+      </div>
+      <div class="dt-cell" style="border-top: 0.5px solid #1e2535;">
+        <div class="dt-cell-label">Tomorrow's focus</div>
+        <div class="dt-cell-content">
+          Valid Anagram<br>
+          Debounce from scratch<br>
+          <span style="color:#5F5E5A;">Machine coding: search bar</span>
+        </div>
+      </div>
+    </div>
+    <div class="dt-divider"></div>
+    <div class="dt-footer">
+      <div>
+        <div class="dt-dots">
+          <div class="dt-dot dot-done"></div>
+          <div class="dt-dot dot-done"></div>
+          <div class="dt-dot dot-done"></div>
+          <div class="dt-dot dot-done"></div>
+          <div class="dt-dot dot-today"></div>
+          <div class="dt-dot dot-empty"></div><div class="dt-dot dot-empty"></div><div class="dt-dot dot-empty"></div><div class="dt-dot dot-empty"></div><div class="dt-dot dot-empty"></div>
+          <div class="dt-dot dot-empty"></div><div class="dt-dot dot-empty"></div><div class="dt-dot dot-empty"></div><div class="dt-dot dot-empty"></div><div class="dt-dot dot-empty"></div>
+          <div class="dt-dot dot-empty"></div><div class="dt-dot dot-empty"></div><div class="dt-dot dot-empty"></div><div class="dt-dot dot-empty"></div><div class="dt-dot dot-empty"></div>
+          <div class="dt-dot dot-empty"></div><div class="dt-dot dot-empty"></div><div class="dt-dot dot-empty"></div><div class="dt-dot dot-empty"></div><div class="dt-dot dot-empty"></div>
+        </div>
+        <div style="font-size: 10px; color: #5F5E5A; margin-top: 6px;">5 of 90 days</div>
+      </div>
+      <div class="dt-hashtags">
+        #100DaysOfCode<br>#FrontendDev<br>#BuildingInPublic
+      </div>
+    </div>
+  </div>
+</div>
