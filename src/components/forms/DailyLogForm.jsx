@@ -1,5 +1,6 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useCallback } from 'react';
 import useTrackerStore from '../../store/useTrackerStore';
+import { supabase, isSupabaseEnabled } from '../../lib/supabase';
 
 const MOODS = [
   { emoji: '🔥', label: 'Beast mode', streakLevel: 4 },
@@ -28,7 +29,7 @@ function QuickBtn({ value, selected, onClick }) {
   );
 }
 
-export function DailyLogForm({ onSaved }) {
+export function DailyLogForm({ onSaved, onLogAdded }) {
   const saveLog = useTrackerStore((s) => s.saveLog);
   const setStreak = useTrackerStore((s) => s.setStreak);
 
@@ -38,6 +39,7 @@ export function DailyLogForm({ onSaved }) {
   const [studyHours, setStudyHours] = useState(null);
   const [showNotes, setShowNotes] = useState(false);
   const [date, setDate] = useState(today);
+  const [saving, setSaving] = useState(false);
 
   const dsaRef = useRef();
   const jsRef = useRef();
@@ -45,14 +47,51 @@ export function DailyLogForm({ onSaved }) {
   const tomorrowRef = useRef();
   const notesRef = useRef();
 
-  const handleSave = () => {
+  const handleSave = useCallback(async () => {
     if (!tomorrowRef.current?.value?.trim() && !dsaRef.current?.value?.trim()) {
       onSaved?.('Fill at least DSA done or Tomorrow task first', 'error');
       return;
     }
 
-    const entry = {
-      id: Date.now(),
+    setSaving(true);
+
+    const supabasePayload = {
+      date,
+      mood,
+      study_hours: studyHours ? parseFloat(studyHours) : null,
+      kred_hours: kredHours ? parseFloat(kredHours) : null,
+      dsa_done: dsaRef.current?.value || '',
+      js_rev: jsRef.current?.value || '',
+      mc_done: mcRef.current?.value || '',
+      tomorrow_task: tomorrowRef.current?.value || '',
+      notes: notesRef.current?.value || '',
+    };
+
+    let savedId = `${Date.now()}`;
+
+    if (isSupabaseEnabled) {
+      // Upsert by date so re-logging same day updates instead of duplicating
+      const { data, error } = await supabase
+        .from('daily_logs')
+        .upsert(supabasePayload, { onConflict: 'date' })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('[Supabase] daily_logs upsert error:', error.message);
+        onSaved?.('Saved locally (Supabase error)', 'error');
+      } else {
+        savedId = data.id;
+        onLogAdded?.(data); // notify parent to refresh list
+        onSaved?.('Logged to cloud! ☁️🔥', 'success');
+      }
+    } else {
+      onSaved?.('Logged locally (no Supabase)', 'success');
+    }
+
+    // Always keep localStorage in sync via store
+    const localEntry = {
+      id: savedId,
       date,
       mood,
       study: studyHours ?? '',
@@ -63,16 +102,15 @@ export function DailyLogForm({ onSaved }) {
       tomorrow: tomorrowRef.current?.value || '',
       notes: notesRef.current?.value || '',
     };
-
-    saveLog(entry);
+    saveLog(localEntry);
 
     // Auto-update streak from mood
     const d = new Date(date);
     const moodObj = MOODS.find((m) => m.emoji === mood);
     setStreak(d.toDateString(), moodObj?.streakLevel ?? 0);
 
-    onSaved?.('Logged! 🔥', 'success');
-  };
+    setSaving(false);
+  }, [date, mood, studyHours, kredHours, onSaved, onLogAdded, saveLog, setStreak]);
 
   return (
     <div className="space-y-5">
@@ -178,10 +216,11 @@ export function DailyLogForm({ onSaved }) {
       <button
         type="button"
         onClick={handleSave}
+        disabled={saving}
         className="w-full h-12 bg-slate-900 text-white rounded-xl font-semibold text-sm
-          hover:bg-slate-800 active:scale-95 transition-all"
+          hover:bg-slate-800 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        Save today's log →
+        {saving ? 'Saving…' : 'Save today\'s log →'}
       </button>
     </div>
   );
