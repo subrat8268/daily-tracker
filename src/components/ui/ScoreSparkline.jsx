@@ -6,7 +6,7 @@
 import { useMemo } from 'react';
 import { calcScore } from '../../hooks/useWeeklySummary';
 
-const W = 200;
+const W = 110;
 const H = 40;
 const PAD = 4;
 
@@ -38,7 +38,7 @@ export function ScoreSparkline({ logs }) {
   const fillD = `${d} L ${points[points.length - 1][0].toFixed(1)} ${H} L ${PAD} ${H} Z`;
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center">
       <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} className="overflow-visible">
         {/* Fill */}
         <path d={fillD} fill={color} fillOpacity={0.08} />
@@ -52,9 +52,6 @@ export function ScoreSparkline({ logs }) {
           fill={color}
         />
       </svg>
-      <span className={`text-[11px] font-semibold ${trending ? 'text-green-600' : 'text-orange-500'}`}>
-        {trending ? '↑' : '↓'} {lastScore}
-      </span>
     </div>
   );
 }
