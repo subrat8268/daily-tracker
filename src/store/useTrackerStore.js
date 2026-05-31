@@ -1,50 +1,88 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { syncItem, loadAllProgress } from '../lib/syncProgress';
 
 const useTrackerStore = create(
   persist(
     (set, get) => ({
-      // ── Checklist states ──────────────────────────────────────────
-      weekDone: {},       // { 'w1-dsa-0': true, ... }
-      mcDone: {},         // { 'mc-Easy-0': true, ... }
-      nsDone: {},         // { 'ns_section_topic': 'none'|'wip'|'done' }
-      streakData: {},     // { 'Sun Jun 01 2026': 3, ... } — level 0-4
-      todayChecks: {},    // { 'today-0_Sun Jun 01 2026': true, ... }
+      // ── State ─────────────────────────────────────────────────────
+      weekDone: {},
+      mcDone: {},
+      nsDone: {},
+      streakData: {},
+      todayChecks: {},
+      logs: [],
+      qaUser: [],
 
-      // ── Logs ──────────────────────────────────────────────────────
-      logs: [],           // [{ id, date, mood, study, kred, dsa, js, mc, tomorrow, notes }]
+      // ── Cloud sync flag ───────────────────────────────────────────
+      _cloudLoaded: false,
 
-      // ── Q&A bank ─────────────────────────────────────────────────
-      qaUser: [],         // user-added questions
+      // ── Boot: load from Supabase and merge ────────────────────────
+      loadFromCloud: async () => {
+        if (get()._cloudLoaded) return;
+        const cloud = await loadAllProgress();
+        if (!cloud) return;
+        set((s) => ({
+          _cloudLoaded: true,
+          // Cloud wins over localStorage for progress data
+          weekDone:    { ...s.weekDone,    ...cloud.weekDone },
+          mcDone:      { ...s.mcDone,      ...cloud.mcDone },
+          nsDone:      { ...s.nsDone,      ...cloud.nsDone },
+          streakData:  { ...s.streakData,  ...cloud.streakData },
+          todayChecks: { ...s.todayChecks, ...cloud.todayChecks },
+        }));
+      },
 
       // ── Actions ───────────────────────────────────────────────────
-      toggleWeek: (id) =>
-        set((s) => ({ weekDone: { ...s.weekDone, [id]: !s.weekDone[id] } })),
+      toggleWeek: (id) => {
+        set((s) => {
+          const next = !s.weekDone[id];
+          syncItem('weekDone', id, next);
+          return { weekDone: { ...s.weekDone, [id]: next } };
+        });
+      },
 
-      toggleMC: (id) =>
-        set((s) => ({ mcDone: { ...s.mcDone, [id]: !s.mcDone[id] } })),
+      toggleMC: (id) => {
+        set((s) => {
+          const next = !s.mcDone[id];
+          syncItem('mcDone', id, next);
+          return { mcDone: { ...s.mcDone, [id]: next } };
+        });
+      },
 
-      cycleNS: (key) =>
+      cycleNS: (key) => {
         set((s) => {
           const cur = s.nsDone[key] || 'none';
           const next = cur === 'none' ? 'wip' : cur === 'wip' ? 'done' : 'none';
+          syncItem('nsDone', key, next);
           return { nsDone: { ...s.nsDone, [key]: next } };
-        }),
+        });
+      },
 
-      setStreak: (dateStr, level) =>
-        set((s) => ({ streakData: { ...s.streakData, [dateStr]: level } })),
+      setStreak: (dateStr, level) => {
+        set((s) => {
+          syncItem('streakData', dateStr, level);
+          return { streakData: { ...s.streakData, [dateStr]: level } };
+        });
+      },
 
-      cycleStreak: (dateStr) =>
+      cycleStreak: (dateStr) => {
         set((s) => {
           const cur = s.streakData[dateStr] || 0;
-          return { streakData: { ...s.streakData, [dateStr]: (cur + 1) % 5 } };
-        }),
+          const next = (cur + 1) % 5;
+          syncItem('streakData', dateStr, next);
+          return { streakData: { ...s.streakData, [dateStr]: next } };
+        });
+      },
 
-      toggleTodayCheck: (id, dateStr) =>
+      toggleTodayCheck: (id, dateStr) => {
         set((s) => {
           const key = id + '_' + dateStr;
-          return { todayChecks: { ...s.todayChecks, [key]: !s.todayChecks[key] } };
-        }),
+          const next = !s.todayChecks[key];
+          syncItem('todayChecks', key, next);
+          return { todayChecks: { ...s.todayChecks, [key]: next } };
+        });
+      },
 
       saveLog: (entry) =>
         set((s) => {
@@ -66,7 +104,7 @@ const useTrackerStore = create(
         set((s) => ({ qaUser: s.qaUser.filter((_, idx) => idx !== i) })),
     }),
     {
-      name: 'subrat-tracker-v2', // localStorage key
+      name: 'subrat-tracker-v2',
     }
   )
 );
