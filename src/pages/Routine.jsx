@@ -1,84 +1,88 @@
 import {
-  Sunrise,
-  Dumbbell,
-  Coffee,
-  Brain,
-  Smartphone,
-  Calculator,
-  Mic,
-  NotebookPen,
-  UtensilsCrossed,
-  Moon,
-} from "lucide-react";
-import { DAILY_BLOCKS } from "../data/routineData";
-import { Card } from "../components/ui/Card";
+  Sunrise, Dumbbell, Coffee, Brain, Smartphone,
+  Calculator, Mic, NotebookPen, UtensilsCrossed, Moon,
+} from 'lucide-react';
+import { DAILY_BLOCKS } from '../data/routineData';
+import { Card } from '../components/ui/Card';
 
 const ICON_MAP = {
-  Sunrise,
-  Dumbbell,
-  Coffee,
-  Brain,
-  Smartphone,
-  Calculator,
-  Mic,
-  NotebookPen,
-  UtensilsCrossed,
-  Moon,
+  Sunrise, Dumbbell, Coffee, Brain, Smartphone,
+  Calculator, Mic, NotebookPen, UtensilsCrossed, Moon,
 };
 
-const COLOR_LINE = {
-  amber: "bg-amber-400",
-  green: "bg-green-500",
-  blue: "bg-blue-500",
-  slate: "bg-slate-200",
+// Map color names → CSS token values
+const LINE_BG = {
+  amber: 'var(--warning)',
+  green: 'var(--success)',
+  blue:  'var(--accent)',
+  slate: 'var(--border-strong)',
 };
-const COLOR_ICON = {
-  amber: "text-amber-500",
-  green: "text-green-600",
-  blue: "text-blue-500",
-  slate: "text-slate-400",
+const ICON_COLOR = {
+  amber: 'var(--warning)',
+  green: 'var(--success)',
+  blue:  'var(--accent)',
+  slate: 'var(--text-tertiary)',
 };
 
 export default function Routine() {
   return (
     <div>
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
-        <div className="text-[13px] font-semibold text-amber-700 mb-1">
+      {/* Alert banner */}
+      <div
+        className="p-4 mb-4"
+        style={{
+          background:   'var(--warning-surface)',
+          border:       '1px solid rgba(230,168,23,0.3)',
+          borderRadius: 'var(--radius-card)',
+        }}
+      >
+        <div className="text-[13px] font-semibold mb-1" style={{ color: 'var(--warning)' }}>
           ⏰ Your actual schedule (from your notebook)
         </div>
-        <p className="text-[12px] text-amber-600 leading-relaxed">
+        <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
           Based on what you wrote: wake before 6, workout at 8, deep work at 10,
           KredBook at 1 PM. I've mapped this exactly — don't start your deep
           work block before the morning blocks are done.
         </p>
       </div>
 
+      {/* Timeline */}
       {DAILY_BLOCKS.map((block, i) => {
         const Icon = ICON_MAP[block.icon] || Brain;
         return (
           <div key={i} className="flex gap-3 mb-3">
-            {/* Time + line */}
+            {/* Time + connector line */}
             <div className="flex flex-col items-end w-[72px] shrink-0 pt-3">
-              <div className="text-[11px] font-semibold font-mono text-slate-800 text-right">
+              <div
+                className="text-[11px] font-semibold font-mono text-right"
+                style={{ color: 'var(--text-primary)' }}
+              >
                 {block.time}
               </div>
-              <div className="text-[10px] text-slate-400">{block.dur}</div>
+              <div className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>{block.dur}</div>
               <div
-                className={`w-0.5 flex-1 mt-1.5 rounded-full min-h-[28px] ${COLOR_LINE[block.color] || COLOR_LINE.slate}`}
+                className="w-0.5 flex-1 mt-1.5 rounded-full min-h-[28px]"
+                style={{ background: LINE_BG[block.color] || LINE_BG.slate }}
               />
             </div>
+
             {/* Card */}
-            <div className="flex-1 bg-white border border-slate-200 rounded-xl p-3 mb-0">
+            <div
+              className="flex-1 p-3"
+              style={{
+                background:   'var(--bg-surface)',
+                border:       '1px solid var(--border)',
+                borderRadius: 'var(--radius-card)',
+                boxShadow:    'var(--shadow-card)',
+              }}
+            >
               <div className="flex items-center gap-2 mb-1">
-                <Icon
-                  size={14}
-                  className={COLOR_ICON[block.color] || COLOR_ICON.slate}
-                />
-                <span className="text-[13px] font-semibold text-slate-800">
+                <Icon size={14} style={{ color: ICON_COLOR[block.color] || ICON_COLOR.slate }} />
+                <span className="text-[13px] font-semibold" style={{ color: 'var(--text-primary)' }}>
                   {block.label}
                 </span>
               </div>
-              <p className="text-[12px] text-slate-500 leading-relaxed">
+              <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                 {block.desc}
               </p>
             </div>
@@ -86,11 +90,11 @@ export default function Routine() {
         );
       })}
 
-      <Card accent accentColor="border-l-slate-300" className="mt-2">
-        <div className="text-[13px] font-semibold text-slate-800 mb-2">
+      <Card accent accentColor="var(--text-tertiary)" className="mt-2">
+        <div className="text-[13px] font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
           📓 Night log rule (non-negotiable)
         </div>
-        <p className="text-[13px] text-slate-500 leading-relaxed">
+        <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
           8:30 PM: open the Daily Log tab. Write what you solved, what was hard,
           and tomorrow's 6 AM first task. Log it here in the tracker. "Log to AI
           and know next step" from your notebook — do that here. This compounds

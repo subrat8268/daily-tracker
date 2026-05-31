@@ -11,11 +11,11 @@ import { StreakAlertBanner } from '../components/ui/StreakAlertBanner';
 import { START_DATE, TOTAL_DAYS } from '../data/constants';
 
 const TODAY_ITEMS = [
-  { id: 0, time: '6:00 AM',  label: 'Rewrite one old problem from memory \u2014 no AI' },
+  { id: 0, time: '6:00 AM',  label: 'Rewrite one old problem from memory — no AI' },
   { id: 1, time: '8:00 AM',  label: 'Workout done' },
   { id: 2, time: '10:00 AM', label: 'NamasteDev: watch + solve + rewrite' },
   { id: 3, time: '1:00 PM',  label: 'KredBook: ship one visible thing' },
-  { id: 4, time: '4:30 PM',  label: '1\u20132 fresh DSA problems' },
+  { id: 4, time: '4:30 PM',  label: '1–2 fresh DSA problems' },
   { id: 5, time: '5:30 PM',  label: "ChatGPT voice quiz on today's JS/React topic" },
   { id: 6, time: '8:30 PM',  label: 'Fill the daily log' },
 ];
@@ -38,14 +38,13 @@ export default function Today() {
     TOTAL_DAYS,
   );
   const nsDoneCount = Object.values(nsDone).filter((v) => v === 'done').length;
+  const checkedToday = Object.entries(todayChecks).filter(([k, v]) => k.includes(todayStr) && v === true).length;
 
   useEffect(() => {
-    const checkedCount = Object.entries(todayChecks)
-      .filter(([k, v]) => k.includes(todayStr) && v === true).length;
-    const autoLevel = checkedCount >= 6 ? 4 : checkedCount >= 4 ? 3 : checkedCount >= 2 ? 2 : checkedCount >= 1 ? 1 : 0;
-    const current = streakData[todayStr] || 0;
+    const autoLevel = checkedToday >= 6 ? 4 : checkedToday >= 4 ? 3 : checkedToday >= 2 ? 2 : checkedToday >= 1 ? 1 : 0;
+    const current   = streakData[todayStr] || 0;
     if (autoLevel > current) setStreak(todayStr, autoLevel);
-  }, [todayChecks, todayStr, streakData, setStreak]);
+  }, [todayChecks, todayStr, streakData, setStreak, checkedToday]);
 
   const handleToggle = useCallback(
     (id) => toggleTodayCheck(`today-${id}`, todayStr),
@@ -63,33 +62,43 @@ export default function Today() {
     return d;
   });
 
+  const stats = [
+    { value: dayNum, sub: 'of 90',     label: 'Day',     accent: false },
+    { value: streak, sub: 'streak',    label: '🔥',      accent: streak >= 3 },
+    { value: nsDoneCount, sub: 'done', label: 'Namaste', accent: false },
+    { value: qaUser.length, sub: 'saved', label: 'Q&As', accent: false },
+  ];
+
   return (
     <div>
       <StreakAlertBanner />
 
       {/* Stat tiles */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-        {[
-          { value: `${dayNum}`,        sub: 'of 90',     label: 'Day' },
-          { value: `${streak}`,        sub: 'streak',    label: '\ud83d\udd25', accent: streak >= 3 },
-          { value: `${nsDoneCount}`,   sub: 'completed', label: 'Namaste' },
-          { value: `${qaUser.length}`, sub: 'saved',     label: 'Q&As' },
-        ].map(({ value, sub, label, accent }) => (
+        {stats.map(({ value, sub, label, accent }) => (
           <div
             key={label}
             className="p-4"
             style={{
-              background: 'var(--bg-surface)',
-              border: '1px solid var(--border)',
+              background:   'var(--bg-surface)',
+              border:       '1px solid var(--border)',
               borderRadius: 'var(--radius-card)',
-              boxShadow: 'var(--shadow-card)',
+              boxShadow:    'var(--shadow-card)',
             }}
           >
-            <div className="text-[11px] font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>{label}</div>
+            <div
+              className="text-[11px] font-medium mb-1 uppercase tracking-wide"
+              style={{ color: 'var(--text-tertiary)' }}
+            >
+              {label}
+            </div>
             <div className="flex items-baseline gap-1.5">
               <span
-                className="text-3xl font-black"
-                style={{ color: accent ? '#FFC043' : 'var(--text-primary)', letterSpacing: '-0.03em' }}
+                className="text-2xl md:text-3xl font-black"
+                style={{
+                  color:          accent ? 'var(--warning)' : 'var(--text-primary)',
+                  letterSpacing:  '-0.03em',
+                }}
               >
                 {value}
               </span>
@@ -108,8 +117,8 @@ export default function Today() {
           <span className="text-[13px] font-semibold" style={{ color: 'var(--text-primary)' }}>
             Today's focus
           </span>
-          <span className="ml-auto text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
-            {Object.entries(todayChecks).filter(([k, v]) => k.includes(todayStr) && v).length} / {TODAY_ITEMS.length}
+          <span className="ml-auto text-[11px] font-mono" style={{ color: 'var(--text-tertiary)' }}>
+            {checkedToday}/{TODAY_ITEMS.length}
           </span>
         </div>
         {TODAY_ITEMS.map(({ id, time, label }) => {
@@ -118,7 +127,7 @@ export default function Today() {
             <CheckItem
               key={id}
               id={id}
-              label={`${time} \u2014 ${label}`}
+              label={`${time} — ${label}`}
               checked={!!todayChecks[key]}
               onToggle={handleToggle}
             />
@@ -129,11 +138,13 @@ export default function Today() {
       {/* Streak heatmap */}
       <Card>
         <div className="flex items-center gap-2 mb-3">
-          <Flame size={14} style={{ color: '#FFC043' }} />
+          <Flame size={14} style={{ color: 'var(--warning)' }} />
           <span className="text-[13px] font-semibold" style={{ color: 'var(--text-primary)' }}>
             90-day streak
           </span>
-          <span className="ml-auto text-[11px]" style={{ color: 'var(--text-tertiary)' }}>tap to override</span>
+          <span className="ml-auto text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
+            tap to override
+          </span>
         </div>
         <div className="flex flex-wrap gap-[3px]">
           {days.map((d) => {
@@ -150,14 +161,15 @@ export default function Today() {
           })}
         </div>
         <div className="flex gap-3 items-center mt-3 flex-wrap">
-          {['none','light','good','solid','beast'].map((l, i) => (
+          {['none', 'light', 'good', 'solid', 'beast'].map((l, i) => (
             <span key={l} className="flex items-center gap-1">
               <span
-                className="w-3 h-3"
+                className="w-3 h-3 inline-block"
                 style={{
-                  display: 'inline-block',
                   borderRadius: 3,
-                  background: i === 0 ? 'var(--bg-elevated)' : `rgba(39,110,241,${[0.2,0.45,0.75,1][i-1]})`,
+                  background: i === 0
+                    ? 'var(--bg-elevated)'
+                    : `rgba(39,110,241,${[0.2, 0.45, 0.75, 1][i - 1]})`,
                   border: '1px solid var(--border)',
                 }}
               />
@@ -171,16 +183,18 @@ export default function Today() {
       <Card accent accentColor="var(--text-tertiary)">
         <div className="flex items-center gap-2 mb-2">
           <Mic size={13} style={{ color: 'var(--text-tertiary)' }} />
-          <span className="text-[13px] font-semibold" style={{ color: 'var(--text-primary)' }}>Senior reminder</span>
+          <span className="text-[13px] font-semibold" style={{ color: 'var(--text-primary)' }}>
+            Senior reminder
+          </span>
         </div>
         <p className="text-[13px] leading-relaxed mb-2" style={{ color: 'var(--text-secondary)' }}>
-          You froze in those interviews because you had zero reps \u2014 not because you&apos;re not smart.
-          Two Sum, filter dashboard \u2014 fixable with 30 practice reps, not 30 days of theory.
-          You have production code at AU Bank, XPharms, KredBook. What you&apos;re adding now is interview muscle.
+          You froze in those interviews because you had zero reps — not because you're not smart.
+          Two Sum, filter dashboard — fixable with 30 practice reps, not 30 days of theory.
+          You have production code at AU Bank, XPharms, KredBook. What you're adding now is interview muscle.
         </p>
         <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-          ChatGPT voice mode for JS/React is smart. Use it like a mock interviewer \u2014
-          &quot;quiz me on closures&quot;, not &quot;explain closures to me.&quot;
+          ChatGPT voice mode for JS/React is smart. Use it like a mock interviewer —
+          "quiz me on closures", not "explain closures to me."
         </p>
       </Card>
     </div>

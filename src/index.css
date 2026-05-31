@@ -1,15 +1,15 @@
-@import "tailwindcss";
-
 /* ── Google Font: Inter ─────────────────────────────────────── */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
 
-/* ── Uber Design Tokens ─────────────────────────────────────── */
+
+/* ── Design Tokens ──────────────────────────────────────────── */
 :root {
   /* Backgrounds */
-  --bg-base:     #FAFAFA;
-  --bg-surface:  #FFFFFF;
-  --bg-elevated: #F4F4F4;
-  --bg-overlay:  #EBEBEB;
+  --bg-base:      #F7F7F7;
+  --bg-surface:   #FFFFFF;
+  --bg-elevated:  #F0F0F0;
+  --bg-overlay:   #E8E8E8;
 
   /* Text */
   --text-primary:   #000000;
@@ -19,40 +19,78 @@
 
   /* Border */
   --border:         #E2E2E2;
-  --border-strong:  #CBCBCB;
+  --border-strong:  #C8C8C8;
 
-  /* Brand */
+  /* Brand / accent */
   --accent:         #276EF1;
-  --accent-hover:   #1a5fd4;
-  --success:        #05A357;
-  --warning:        #FFC043;
-  --danger:         #E11900;
+  --accent-hover:   #1A5FD4;
+  --accent-surface: rgba(39,110,241,0.08);
 
-  /* Sidebar */
+  /* Status */
+  --success:          #05A357;
+  --success-surface:  rgba(5,163,87,0.09);
+  --warning:          #E6A817;
+  --warning-surface:  rgba(230,168,23,0.10);
+  --danger:           #E11900;
+  --danger-surface:   rgba(225,25,0,0.08);
+
+  /* Status states (NamasteDev topics) */
+  --status-wip-bg:    rgba(230,168,23,0.10);
+  --status-wip-text:  #9A6E00;
+  --status-wip-dot:   #E6A817;
+  --status-done-bg:   rgba(5,163,87,0.09);
+  --status-done-text: #05A357;
+  --status-done-dot:  #05A357;
+
+  /* Form inputs */
+  --input-bg:       #F7F7F7;
+  --input-border:   #E2E2E2;
+  --input-focus:    #276EF1;
+
+  /* Layout */
   --sidebar-w-collapsed: 64px;
   --sidebar-w-expanded:  220px;
 
-  /* Misc */
-  --radius-card:  8px;
-  --radius-pill:  999px;
-  --shadow-card:  0 1px 4px rgba(0,0,0,0.07);
+  /* Radius */
+  --radius-card: 8px;
+  --radius-sm:   4px;
+  --radius-pill: 999px;
+
+  /* Shadow */
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-elevated: 0 4px 16px rgba(0,0,0,0.10);
 }
 
 [data-theme="dark"] {
-  --bg-base:     #0A0A0A;
-  --bg-surface:  #141414;
-  --bg-elevated: #1C1C1C;
-  --bg-overlay:  #2A2A2A;
+  --bg-base:      #0A0A0A;
+  --bg-surface:   #141414;
+  --bg-elevated:  #1E1E1E;
+  --bg-overlay:   #2A2A2A;
 
-  --text-primary:   #FFFFFF;
+  --text-primary:   #F5F5F5;
   --text-secondary: #ABABAB;
-  --text-tertiary:  #6B6B6B;
+  --text-tertiary:  #666666;
   --text-inverse:   #000000;
 
   --border:        #2A2A2A;
   --border-strong: #3A3A3A;
 
-  --shadow-card: 0 1px 4px rgba(0,0,0,0.4);
+  --accent-surface: rgba(39,110,241,0.15);
+
+  --success-surface:  rgba(5,163,87,0.14);
+  --warning-surface:  rgba(230,168,23,0.14);
+  --danger-surface:   rgba(225,25,0,0.14);
+
+  --status-wip-bg:    rgba(230,168,23,0.14);
+  --status-wip-text:  #E6B84A;
+  --status-done-bg:   rgba(5,163,87,0.14);
+  --status-done-text: #2CC77A;
+
+  --input-bg:       #1E1E1E;
+  --input-border:   #2A2A2A;
+
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-elevated: 0 4px 16px rgba(0,0,0,0.4);
 }
 
 /* ── Base resets ─────────────────────────────────────────────── */
@@ -62,14 +100,14 @@ html, body, #root {
   height: 100%;
   margin: 0;
   padding: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: var(--bg-base);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Scrollbar (desktop) ─────────────────────────────────────── */
+/* ── Scrollbar ───────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 99px; }
@@ -77,26 +115,62 @@ html, body, #root {
 /* ── Focus ring ──────────────────────────────────────────────── */
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* ── Transitions ─────────────────────────────────────────────── */
+/* ── Theme transition ────────────────────────────────────────── */
 .theme-transition,
 .theme-transition * {
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
 }
 
-/* ── Streak pulse (today cell) ───────────────────────────────── */
+/* ── Animations ──────────────────────────────────────────────── */
 @keyframes pulse-slow {
   0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(39,110,241,0.5); }
   50%       { opacity: 0.85; box-shadow: 0 0 0 4px rgba(39,110,241,0); }
 }
 .animate-pulse-slow { animation: pulse-slow 2.5s ease-in-out infinite; }
 
-/* ── Sidebar expand transition ───────────────────────────────── */
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-slide-up { animation: slide-up 0.18s ease-out both; }
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.animate-fade-in { animation: fade-in 0.15s ease-out both; }
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-elevated) 25%, var(--bg-overlay) 50%, var(--bg-elevated) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite linear;
+  border-radius: var(--radius-sm);
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────── */
 .sidebar { transition: width 0.2s cubic-bezier(0.4,0,0.2,1); }
 
-/* ── Uber surface utility classes ────────────────────────────── */
-.u-surface   { background: var(--bg-surface);  border: 1px solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow-card); }
-.u-elevated  { background: var(--bg-elevated); border-radius: 6px; }
-.u-pill      { border-radius: var(--radius-pill); }
-.u-text-1    { color: var(--text-primary); }
-.u-text-2    { color: var(--text-secondary); }
-.u-text-3    { color: var(--text-tertiary); }
+/* ── Surface utilities ───────────────────────────────────────── */
+.u-surface  { background: var(--bg-surface);  border: 1px solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow-card); }
+.u-elevated { background: var(--bg-elevated); border-radius: var(--radius-sm); }
+.u-pill     { border-radius: var(--radius-pill); }
+.u-text-1   { color: var(--text-primary); }
+.u-text-2   { color: var(--text-secondary); }
+.u-text-3   { color: var(--text-tertiary); }
+
+/* ── Input base ──────────────────────────────────────────────── */
+.u-input {
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--text-primary);
+  border-radius: var(--radius-card);
+  font-size: 14px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.u-input::placeholder { color: var(--text-tertiary); }
+.u-input:focus { outline: none; border-color: var(--input-focus); background: var(--bg-surface); }
