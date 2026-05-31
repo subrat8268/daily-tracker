@@ -133,15 +133,26 @@ export function ShareCardModal({ log, isOpen, onClose }) {
     if (!cardRef.current || downloading) return;
     setDownloading(true);
 
-    // Wait a brief moment to ensure fonts are fully styled
+    // Wait a brief moment to ensure fonts and styles are fully loaded
     setTimeout(() => {
-      toPng(cardRef.current, {
+      const node = cardRef.current;
+      const wrapEl = node.querySelector('.dt-wrap');
+      const wrapHeight = wrapEl ? wrapEl.offsetHeight : node.offsetHeight;
+      const finalHeight = wrapHeight + 64; // 2rem padding top (32px) + 2rem padding bottom (32px)
+      const finalWidth = 540;
+
+      toPng(node, {
+        width: finalWidth,
+        height: finalHeight,
         quality: 1,
         pixelRatio: 3, // 3x for ultra-sharp high-res text on LinkedIn
         backgroundColor: '#070a13', // Soft matching backdrop behind the card
         style: {
           transform: 'scale(1)',
           transformOrigin: 'top left',
+          width: `${finalWidth}px`,
+          height: `${finalHeight}px`,
+          margin: '0',
         }
       })
       .then((dataUrl) => {
