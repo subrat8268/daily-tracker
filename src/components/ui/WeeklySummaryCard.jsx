@@ -1,16 +1,15 @@
 import { TrendingUp } from 'lucide-react';
 import { Card, FlatCard } from './Card';
+import { ScoreSparkline } from './ScoreSparkline';
 import { useWeeklySummary } from '../../hooks/useWeeklySummary';
 
 function ScoreRing({ score }) {
   const color = score >= 75 ? 'text-green-600' : score >= 50 ? 'text-amber-500' : 'text-red-400';
-  return (
-    <div className={`text-2xl font-bold ${color}`}>{score}</div>
-  );
+  return <div className={`text-2xl font-bold ${color}`}>{score}</div>;
 }
 
 export function WeeklySummaryCard() {
-  const { summary, loading } = useWeeklySummary();
+  const { summary, loading, logs } = useWeeklySummary();
 
   if (loading) return (
     <Card>
@@ -22,9 +21,9 @@ export function WeeklySummaryCard() {
 
   const stats = [
     { value: `${summary.totalStudy}h`, label: 'Study (7d)' },
-    { value: `${summary.totalKred}h`, label: 'KredBook (7d)' },
-    { value: summary.dsaCount,        label: 'DSA days' },
-    { value: summary.logCount,        label: 'Days logged' },
+    { value: `${summary.totalKred}h`,  label: 'KredBook (7d)' },
+    { value: summary.dsaCount,         label: 'DSA days' },
+    { value: summary.logCount,         label: 'Days logged' },
   ];
 
   return (
@@ -34,10 +33,13 @@ export function WeeklySummaryCard() {
           <TrendingUp size={15} className="text-blue-500" />
           <span className="text-[13px] font-semibold text-slate-800">Last 7 days</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-[11px] text-slate-400">avg score</span>
-          <ScoreRing score={summary.avgScore} />
-          <span className="text-[11px] text-slate-400">/100</span>
+        <div className="flex items-center gap-2">
+          <ScoreSparkline logs={logs} />
+          <div className="flex items-center gap-1 ml-2">
+            <span className="text-[11px] text-slate-400">avg</span>
+            <ScoreRing score={summary.avgScore} />
+            <span className="text-[11px] text-slate-400">/100</span>
+          </div>
         </div>
       </div>
 
@@ -53,7 +55,7 @@ export function WeeklySummaryCard() {
       {summary.bestDay && (
         <div className="text-[11px] text-slate-400">
           🏆 Best day: <span className="text-slate-600 font-medium">{summary.bestDay.date}</span>
-          {summary.bestDay.dsa_done || summary.bestDay.dsa
+          {(summary.bestDay.dsa_done || summary.bestDay.dsa)
             ? ` — ${(summary.bestDay.dsa_done || summary.bestDay.dsa).slice(0, 40)}…`
             : ''}
         </div>

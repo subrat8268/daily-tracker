@@ -1,8 +1,3 @@
-/**
- * useWeeklySummary.js
- * Computes last-7-days stats from Supabase daily_logs.
- * Returns { totalStudy, totalKred, avgScore, dsaCount, bestMood, loading }
- */
 import { useState, useEffect } from 'react';
 import { supabase, isSupabaseEnabled } from '../lib/supabase';
 import useTrackerStore from '../store/useTrackerStore';
@@ -20,12 +15,13 @@ export function calcScore(log) {
 export function useWeeklySummary() {
   const storeLogs = useTrackerStore((s) => s.logs);
   const [summary, setSummary] = useState(null);
+  const [logs, setLogs]       = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function compute() {
       setLoading(true);
-      let logs = [];
+      let rawLogs = [];
 
       if (isSupabaseEnabled) {
         const since = new Date();
@@ -35,25 +31,32 @@ export function useWeeklySummary() {
           .select('*')
           .gte('date', since.toISOString().slice(0, 10))
           .order('date', { ascending: false });
-        logs = data || [];
+        rawLogs = data || [];
       } else {
-        logs = storeLogs.slice(0, 7);
+        rawLogs = storeLogs.slice(0, 7);
       }
 
-      if (!logs.length) { setLoading(false); setSummary(null); return; }
+      setLogs(rawLogs);
 
-      const totalStudy = logs.reduce((s, l) => s + parseFloat(l.study_hours || l.study || 0), 0);
-      const totalKred  = logs.reduce((s, l) => s + parseFloat(l.kred_hours  || l.kred  || 0), 0);
-      const scores     = logs.map(calcScore);
+      if (!rawLogs.length) { setLoading(false); setSummary(null); return; }
+
+      const totalStudy = rawLogs.reduce((s, l) => s + parseFloat(l.study_hours || l.study || 0), 0);
+      const totalKred  = rawLogs.reduce((s, l) => s + parseFloat(l.kred_hours  || l.kred  || 0), 0);
+      const scores     = rawLogs.map(calcScore);
       const avgScore   = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
-      const dsaCount   = logs.filter((l) => (l.dsa_done || l.dsa)?.trim()).length;
-      const bestDay    = logs.reduce((best, l) => calcScore(l) >= calcScore(best) ? l : best, logs[0]);
+      const dsaCount   = rawLogs.filter((l) => (l.dsa_done || l.dsa)?.trim()).length;
+      const bestDay    = rawLogs.reduce((best, l) => calcScore(l) >= calcScore(best) ? l : best, rawLogs[0]);
 
-      setSummary({ totalStudy: totalStudy.toFixed(1), totalKred: totalKred.toFixed(1), avgScore, dsaCount, bestDay, logCount: logs.length });
+      setSummary({
+        totalStudy: totalStudy.toFixed(1),
+        totalKred:  totalKred.toFixed(1),
+        avgScore, dsaCount, bestDay,
+        logCount: rawLogs.length,
+      });
       setLoading(false);
     }
     compute();
   }, [storeLogs]);
 
-  return { summary, loading };
+  return { summary, logs, loading };
 }

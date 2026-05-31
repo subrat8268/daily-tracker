@@ -21,7 +21,7 @@ export const StreakDay = memo(function StreakDay({ date, level, isToday, onClick
       aria-label={label}
       className={`w-5 h-5 rounded-[3px] border flex-shrink-0 transition-all duration-100 active:scale-90
         ${LEVEL_CLASSES[level] || LEVEL_CLASSES[0]}
-        ${isToday ? '!border-blue-500 !border-2' : ''}
+        ${isToday ? '!border-blue-500 !border-2 animate-pulse-slow ring-2 ring-blue-300 ring-offset-1' : ''}
       `}
     />
   );

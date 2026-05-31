@@ -4,15 +4,14 @@ import useTrackerStore from '../store/useTrackerStore';
 import { supabase, isSupabaseEnabled } from '../lib/supabase';
 import { DailyLogForm } from '../components/forms/DailyLogForm';
 import { Card } from '../components/ui/Card';
+import { EmptyState } from '../components/ui/EmptyState';
 import { useAppToast } from '../components/layout/AppShell';
 import { calcScore } from '../hooks/useWeeklySummary';
 
 function ScoreBadge({ log }) {
   const score = calcScore(log);
   const color = score >= 75 ? 'bg-green-100 text-green-700' : score >= 50 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-500';
-  return (
-    <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded-lg ${color}`}>{score}</span>
-  );
+  return <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded-lg ${color}`}>{score}</span>;
 }
 
 function LogCard({ log, onDelete }) {
@@ -34,9 +33,9 @@ function LogCard({ log, onDelete }) {
       <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[12px]">
         {log.study_hours != null && <div><span className="text-slate-400">Study:</span> <span className="text-slate-700 font-medium">{log.study_hours}h</span></div>}
         {log.kred_hours  != null && <div><span className="text-slate-400">KredBook:</span> <span className="text-slate-700 font-medium">{log.kred_hours}h</span></div>}
-        {(log.dsa_done || log.dsa)         && <div className="col-span-2"><span className="text-slate-400">DSA:</span> <span className="text-slate-700">{log.dsa_done || log.dsa}</span></div>}
-        {(log.js_rev  || log.js)           && <div className="col-span-2"><span className="text-slate-400">JS/React:</span> <span className="text-slate-700">{log.js_rev || log.js}</span></div>}
-        {(log.mc_done || log.mc)           && <div className="col-span-2"><span className="text-slate-400">Machine:</span> <span className="text-slate-700">{log.mc_done || log.mc}</span></div>}
+        {(log.dsa_done   || log.dsa) && <div className="col-span-2"><span className="text-slate-400">DSA:</span> <span className="text-slate-700">{log.dsa_done || log.dsa}</span></div>}
+        {(log.js_rev     || log.js)  && <div className="col-span-2"><span className="text-slate-400">JS/React:</span> <span className="text-slate-700">{log.js_rev || log.js}</span></div>}
+        {(log.mc_done    || log.mc)  && <div className="col-span-2"><span className="text-slate-400">Machine:</span> <span className="text-slate-700">{log.mc_done || log.mc}</span></div>}
         {(log.tomorrow_task || log.tomorrow) && (
           <div className="col-span-2 mt-1 pt-1 border-t border-slate-100">
             <span className="text-blue-500 font-medium">Tomorrow 6AM:</span>{' '}
@@ -57,7 +56,8 @@ export default function DailyLog() {
 
   const [cloudLogs, setCloudLogs] = useState([]);
   const [loading, setLoading]     = useState(false);
-  const [prefill, setPrefill]     = useState(null); // tomorrow_task from last log
+  const [prefill, setPrefill]     = useState(null);
+  const [formKey, setFormKey]     = useState(0); // increment to reset form
 
   useEffect(() => {
     if (!isSupabaseEnabled) return;
@@ -71,7 +71,6 @@ export default function DailyLog() {
         if (error) { console.error('[Supabase] fetch error:', error.message); return; }
         if (data) {
           setCloudLogs(data);
-          // Auto-prefill tomorrow task from most recent log
           const last = data[0];
           if (last?.tomorrow_task) setPrefill(last.tomorrow_task);
         }
@@ -87,6 +86,7 @@ export default function DailyLog() {
       return [newRow, ...prev];
     });
     setPrefill(newRow.tomorrow_task || null);
+    setFormKey((k) => k + 1); // reset form fields after save
   }, []);
 
   const handleDelete = useCallback(async (id) => {
@@ -131,12 +131,11 @@ export default function DailyLog() {
         <div className="text-[13px] font-semibold text-slate-800 mb-4 flex items-center gap-2">
           ✏️ Today’s log
           {prefill && (
-            <span className="text-[11px] font-normal text-blue-500 ml-auto">
-              Pre-filled from yesterday ✓
-            </span>
+            <span className="text-[11px] font-normal text-blue-500 ml-auto">Pre-filled from yesterday ✓</span>
           )}
         </div>
         <DailyLogForm
+          key={formKey}
           onSaved={(msg, type) => addToast?.(msg, type)}
           onLogAdded={handleLogAdded}
           prefillDsa={prefill}
@@ -161,20 +160,30 @@ export default function DailyLog() {
         </div>
       </div>
 
+      {/* Mobile cards */}
       <div className="md:hidden">
         {logs.length === 0
-          ? <p className="text-[13px] text-slate-400 text-center py-8">{loading ? 'Fetching logs…' : 'No logs yet. Fill the form above tonight.'}</p>
+          ? <EmptyState
+              emoji="📝"
+              title={loading ? 'Loading logs…' : 'No logs yet'}
+              subtitle={loading ? '' : 'Fill the form above at 8:30 PM tonight. Takes 60 seconds.'}
+            />
           : logs.map((log) => <LogCard key={log.id} log={log} onDelete={handleDelete} />)}
       </div>
 
+      {/* Desktop table */}
       <div className="hidden md:block overflow-x-auto">
         {logs.length === 0
-          ? <p className="text-[13px] text-slate-400 py-4">{loading ? 'Fetching logs…' : 'No logs yet.'}</p>
+          ? <EmptyState
+              emoji="📝"
+              title={loading ? 'Loading…' : 'No logs yet'}
+              subtitle="Fill the form above to get started."
+            />
           : (
             <table className="w-full border-collapse text-[12px]">
               <thead>
                 <tr>
-                  {['Date', 'Mood', 'Score', 'Study', 'KredBook', 'DSA', 'JS/React', 'Machine', 'Tomorrow', ''].map((h) => (
+                  {['Date','Mood','Score','Study','KredBook','DSA','JS/React','Machine','Tomorrow',''].map((h) => (
                     <th key={h} className="bg-slate-50 px-3 py-2 text-left border border-slate-200 text-[11px] uppercase tracking-wider text-slate-500 font-semibold">{h}</th>
                   ))}
                 </tr>

@@ -1,26 +1,11 @@
 @import "tailwindcss";
 
-@theme {
-  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-mono: ui-monospace, 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
+/* Custom animation: slow pulse for today's streak cell */
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+  50%       { opacity: 0.85; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0); }
 }
 
-/* Safe area for bottom nav on iOS/Android gesture bar */
-.pb-safe {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+.animate-pulse-slow {
+  animation: pulse-slow 2.5s ease-in-out infinite;
 }
-
-/* Smooth tap highlight removal on mobile */
-* {
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* Prevent iOS input zoom (font-size must be ≥16px on inputs) */
-input, textarea, select {
-  font-size: 16px;
-}
-
-/* Scrollbar styling */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
