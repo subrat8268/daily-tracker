@@ -5,18 +5,18 @@ import { useStreak } from '../hooks/useStreak';
 import { useAppToast } from '../components/layout/AppShell';
 import { CheckItem } from '../components/ui/CheckItem';
 import { StreakDay } from '../components/ui/StreakDay';
-import { Card, FlatCard } from '../components/ui/Card';
+import { Card } from '../components/ui/Card';
 import { WeeklySummaryCard } from '../components/ui/WeeklySummaryCard';
 import { StreakAlertBanner } from '../components/ui/StreakAlertBanner';
 import { START_DATE, TOTAL_DAYS } from '../data/constants';
 
 const TODAY_ITEMS = [
-  { id: 0, time: '6:00 AM',  label: 'Rewrite one old problem from memory — no AI' },
+  { id: 0, time: '6:00 AM',  label: 'Rewrite one old problem from memory \u2014 no AI' },
   { id: 1, time: '8:00 AM',  label: 'Workout done' },
   { id: 2, time: '10:00 AM', label: 'NamasteDev: watch + solve + rewrite' },
   { id: 3, time: '1:00 PM',  label: 'KredBook: ship one visible thing' },
-  { id: 4, time: '4:30 PM',  label: '1–2 fresh DSA problems' },
-  { id: 5, time: '5:30 PM',  label: 'ChatGPT voice quiz on today's JS/React topic' },
+  { id: 4, time: '4:30 PM',  label: '1\u20132 fresh DSA problems' },
+  { id: 5, time: '5:30 PM',  label: "ChatGPT voice quiz on today's JS/React topic" },
   { id: 6, time: '8:30 PM',  label: 'Fill the daily log' },
 ];
 
@@ -67,11 +67,11 @@ export default function Today() {
     <div>
       <StreakAlertBanner />
 
-      {/* Stat tiles — left-aligned Uber dashboard style */}
+      {/* Stat tiles */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         {[
           { value: `${dayNum}`,        sub: 'of 90',     label: 'Day' },
-          { value: `${streak}`,        sub: 'streak',    label: '🔥', accent: streak >= 3 },
+          { value: `${streak}`,        sub: 'streak',    label: '\ud83d\udd25', accent: streak >= 3 },
           { value: `${nsDoneCount}`,   sub: 'completed', label: 'Namaste' },
           { value: `${qaUser.length}`, sub: 'saved',     label: 'Q&As' },
         ].map(({ value, sub, label, accent }) => (
@@ -118,7 +118,7 @@ export default function Today() {
             <CheckItem
               key={id}
               id={id}
-              label={`${time} — ${label}`}
+              label={`${time} \u2014 ${label}`}
               checked={!!todayChecks[key]}
               onToggle={handleToggle}
             />
@@ -149,7 +149,6 @@ export default function Today() {
             );
           })}
         </div>
-        {/* Legend */}
         <div className="flex gap-3 items-center mt-3 flex-wrap">
           {['none','light','good','solid','beast'].map((l, i) => (
             <span key={l} className="flex items-center gap-1">
@@ -175,13 +174,13 @@ export default function Today() {
           <span className="text-[13px] font-semibold" style={{ color: 'var(--text-primary)' }}>Senior reminder</span>
         </div>
         <p className="text-[13px] leading-relaxed mb-2" style={{ color: 'var(--text-secondary)' }}>
-          You froze in those interviews because you had zero reps — not because you're not smart.
-          Two Sum, filter dashboard — fixable with 30 practice reps, not 30 days of theory.
-          You have production code at AU Bank, XPharms, KredBook. What you're adding now is interview muscle.
+          You froze in those interviews because you had zero reps \u2014 not because you&apos;re not smart.
+          Two Sum, filter dashboard \u2014 fixable with 30 practice reps, not 30 days of theory.
+          You have production code at AU Bank, XPharms, KredBook. What you&apos;re adding now is interview muscle.
         </p>
         <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-          ChatGPT voice mode for JS/React is smart. Use it like a mock interviewer —
-          "quiz me on closures", not "explain closures to me."
+          ChatGPT voice mode for JS/React is smart. Use it like a mock interviewer \u2014
+          &quot;quiz me on closures&quot;, not &quot;explain closures to me.&quot;
         </p>
       </Card>
     </div>
